@@ -21,7 +21,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                            item_data *type_final);
 
 #define GET_TOKEN() \
-        if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag))) == NULL) {\
+        if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag),&data->char_pos)) == NULL) {\
             return ret_code;                                               \
         }           \
 
@@ -318,6 +318,10 @@ int reduce(){
 #ifdef SEM_DEBUG
         printf("not a rule\n");
 #endif
+#ifdef FOR_LSP
+        fprintf(stderr, "Not a rule\n");
+#endif
+
         return ER_SYNTAX;
     }
     else{
@@ -326,6 +330,9 @@ int reduce(){
         if ((ret_code = check_semantics(rule, op1, op2, op3, &final_item))){
 #ifdef SEM_DEBUG
             printf("wrong types\n");
+#endif
+#ifdef FOR_LSP
+            fprintf(stderr, "Wrong Types\n");
 #endif
             return ret_code;
         }
@@ -397,6 +404,9 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
             printf("semantic analysis finish with error\n");
 #endif
+#ifdef FOR_LSP
+            fprintf(stderr, "Semantic analysis finish with error\n");
+#endif
             FREE(ER_INTERNAL);
         }
 
@@ -411,6 +421,9 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
 #endif
+#ifdef FOR_LSP
+                    fprintf(stderr, "Semantic analysis finish with error\n");
+#endif
                     FREE(ER_INTERNAL);
                 }
 
@@ -418,11 +431,14 @@ int expression(parser_data_t* data){
                 stack_print_all_symbols(&stack);
 #endif
 
-                data->token_ptr = next_token(&(data->line_cnt),&ret_code, &(data->eol_flag));
+                data->token_ptr = next_token(&(data->line_cnt),&ret_code, &(data->eol_flag),&data->char_pos);
                 if(ret_code != ER_NONE)
                 {
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
+#endif
+#ifdef FOR_LSP
+                    fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
                     FREE(ER_INTERNAL);
                 }
@@ -435,6 +451,9 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
 #endif
+#ifdef FOR_LSP
+                    fprintf(stderr, "Semantic analysis finish with error\n");
+#endif
                     FREE(ER_INTERNAL);
                 }
                 tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
@@ -444,6 +463,9 @@ int expression(parser_data_t* data){
                 {
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
+#endif
+#ifdef FOR_LSP
+                    fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
                     FREE(ER_INTERNAL);
                 }
@@ -457,11 +479,14 @@ int expression(parser_data_t* data){
                 stack_print_all_symbols(&stack);
 #endif
 
-                data->token_ptr = next_token(&(data->line_cnt),&ret_code, &(data->eol_flag));
+                data->token_ptr = next_token(&(data->line_cnt),&ret_code, &(data->eol_flag),&data->char_pos);
                 if(ret_code != ER_NONE)
                 {
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
+#endif
+#ifdef FOR_LSP
+                    fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
                     FREE(ret_code);
                 }
@@ -475,6 +500,9 @@ int expression(parser_data_t* data){
                 {
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
+#endif
+#ifdef FOR_LSP
+                    fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
                     FREE(ret_code);
                 }
@@ -491,6 +519,9 @@ int expression(parser_data_t* data){
                 {
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
+#endif
+#ifdef FOR_LSP
+                    fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
                     FREE(ER_SYNTAX);
                 }
@@ -513,6 +544,9 @@ int expression(parser_data_t* data){
     if((ret_code =check_semantics(NT_AS_NT,&op1,&op2,&op3,&final_type))){
 #ifdef SEM_DEBUG
         printf("semantic analysis finish with error\n");
+#endif
+#ifdef FOR_LSP
+        fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
         FREE(ret_code);
     }

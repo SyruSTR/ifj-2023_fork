@@ -12,6 +12,7 @@ token_t_ptr create_token(){
     token_t_ptr token;
     token = (token_t_ptr) malloc(sizeof(struct token));
     token->token_type = T_ITS_NOT_A_TOKEN;
+    token->string = string_init();
     return token;
 }
 
@@ -20,6 +21,8 @@ void delete_token(token_t_ptr token){
     if(token != NULL){
         if(token->token_type == T_STRING)
             free(token->attribute.string);
+        if (token->string != NULL)
+            free(token->string);
         free(token);
     }
 }
@@ -40,6 +43,7 @@ const char *keywords[] = {"Double","else","func","if","Int","let","nil","return"
 void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type,string_ptr string){
     token->token_type = token_type;
     token->line = line_cnt;
+    token->string = string;
 #ifdef PARS_DEBUG
     printf("Token %s found in line %i", tokens[token->token_type], line_cnt);
 
@@ -97,9 +101,9 @@ bool keyword_control(token_t_ptr token, string_ptr add_string){
     return false;
 }
 // TODO: changes in scanner (flag for EOL)
-token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
+token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
 
-
+    *char_pos = 0;
     int c;
 
     int comment_count = 0;
@@ -126,6 +130,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
     unsigned quot_count = 0;
     *flag = false;
     while((c = getc(stdin))){
+        (*char_pos)++;
         if(c == 13){
             continue;
         }
@@ -134,6 +139,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                 if(c == '\n'){
                     (*line_cnt)++;
                     *flag = true;
+                    *char_pos = 0;
                     continue;
                 }
                 else if(isspace(c))

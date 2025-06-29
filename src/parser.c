@@ -13,10 +13,18 @@
 #include "semantics.h"
 #include "generator.h"
 
+void print_json_message(char* message, const parser_data_t* data, const int ret_code) {
+    string_ptr tmp_str = string_init();
+    data->token_ptr->string == NULL ? string_concat(tmp_str,"null") : string_concat(tmp_str,data->token_ptr->string->string);
+    fprintf(stderr,"{\n\terror_code : %d,\n\tmessage : \"%s\",\n\tline : %d,char_pos : %d,\n\ttoken_type : %d,\n\ttoken_string : \"%s\"\n}",ret_code,message,data->line_cnt,data->char_pos,data->token_ptr->token_type,tmp_str->string);
+}
+
+#define PRINT_SYNTAX_ERROR(message) {ret_code = ER_SYNTAX; print_json_message(message,data,ret_code); return ret_code;}
+
 #define UNUSED(x) (void)(x)
 
 #define GET_TOKEN() \
-        if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag))) == NULL) {\
+        if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag),&data->char_pos)) == NULL) {\
             return ret_code;                                               \
         }           \
 
@@ -27,7 +35,7 @@
 
 #define VERIFY_TOKEN(t_token)  \
     GET_TOKEN()                \
-    if (data->token_ptr->token_type != t_token) return ER_SYNTAX;\
+    if (data->token_ptr->token_type != t_token) PRINT_SYNTAX_ERROR("Syntax ERROR");\
                                \
 
 
@@ -231,20 +239,21 @@ int analyse() {
     bool flag = false;
 
     string_ptr string;
-    if ((string = string_init()) == NULL) return ER_INTERNAL;
+    if ((string = string_init()) == NULL)
+        PRINT_MESSAGE_AND_EXIT_SHORT("Internal error code",ER_INTERNAL)
 
     parser_data_t *parser_data;
     if ((parser_data = init_data()) == NULL)
     {
         string_free(string);
-        return ER_INTERNAL;
+        PRINT_MESSAGE_AND_EXIT_SHORT("Internal error code",ER_INTERNAL)
     }
 
     parser_data->line_cnt = 1;
 
     generator_start();
 
-    if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code, &flag)) != NULL)
+    if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code, &flag,&parser_data->char_pos)) != NULL)
     {
         ret_code = program(parser_data);
     }
@@ -277,7 +286,6 @@ int stm(parser_data_t *data) {
     // <stm> -> var + let id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && ( data->token_ptr->attribute.keyword == k_var || (is_let = data->token_ptr->attribute.keyword == k_let))) {
         data->is_in_declaration = true;
-
         VERIFY_TOKEN(T_ID)
         INSERT_SYM()
         if(table_count_elements_in_stack(data->table_stack) == 1)
@@ -308,7 +316,10 @@ int stm(parser_data_t *data) {
                 }
                 return stm(data);
             }
-            else return ER_SYNTAX;
+            else {
+                print_json_message("Wainting Assigment or EOL",data,ret_code);
+                return ret_code;
+            }
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
@@ -317,9 +328,10 @@ int stm(parser_data_t *data) {
             data->is_in_declaration = false;
             if(data->eol_flag)
                 return stm(data);
-            return ER_SYNTAX;
+            VERIFY_TOKEN(T_EOF)
+            return ER_NONE;
         }
-        else return ER_SYNTAX;
+        else PRINT_SYNTAX_ERROR("Waiting Colon or Assigment")
 
         GET_TOKEN()
     }
@@ -352,7 +364,7 @@ int stm(parser_data_t *data) {
 
             gen_function_pass_param_count(data->param_index+1);
 
-            if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
+            if (data->token_ptr->token_type != T_BRACKET_CLOSE) PRINT_SYNTAX_ERROR("Waiting close bracket")
 
             gen_function_call(data->id_type->id);
 
@@ -368,11 +380,11 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(expression)
 
-            if (!data->eol_flag && data->token_ptr->token_type != T_EOF) return ER_SYNTAX;
+            if (!data->eol_flag && data->token_ptr->token_type != T_EOF) PRINT_SYNTAX_ERROR("Waiting EOL")
 
             return stm(data);
         } else
-            return ER_SYNTAX;
+            PRINT_SYNTAX_ERROR("Waiting assigment variable or function call")
     }
 
     // <stm> -> func func_id( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
@@ -407,7 +419,7 @@ int stm(parser_data_t *data) {
         hash_table *local_table2 = create_hash_table();
         table_stack_push(data->table_stack,local_table2);
 
-        if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
+        if (data->token_ptr->token_type != T_BRACKET_CLOSE) PRINT_SYNTAX_ERROR("Waiting bracket close")
 
         GET_TOKEN()
         if (data->token_ptr->token_type == T_ARROW) {
@@ -423,7 +435,7 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(stm)
 
-            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) PRINT_SYNTAX_ERROR("Waiting Curved bracket close")
             table_stack_pop(data->table_stack);
             table_stack_pop(data->table_stack);
 
@@ -446,7 +458,7 @@ int stm(parser_data_t *data) {
 
             return stm(data);
         }
-        else return ER_SYNTAX;
+        else PRINT_SYNTAX_ERROR("Waiting function body")
     }
 
     // <stm> -> if ( <condition> ) { <stm> } \n else { <stm> } \n <stm>
@@ -458,19 +470,19 @@ int stm(parser_data_t *data) {
         hash_table *local_table = create_hash_table();
         table_stack_push(data->table_stack,local_table);
 
-        if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) PRINT_SYNTAX_ERROR("Waiting curved bracket open")
 
         GET_TOKEN()
         CHECK_RULE(stm)
 
-        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) PRINT_SYNTAX_ERROR("Waiting curved bracket close")
 
 
         table_stack_pop(data->table_stack);
 
 
         GET_TOKEN()
-        if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_else)) return ER_SYNTAX;
+        if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_else)) PRINT_SYNTAX_ERROR("Waiting condition bodym non a keyword or ELSE")
 
         local_table = create_hash_table();
         table_stack_push(data->table_stack,local_table);
@@ -481,7 +493,7 @@ int stm(parser_data_t *data) {
         CHECK_RULE(stm)
         data->is_it_let_condition = false;
 
-        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) PRINT_SYNTAX_ERROR("Waiting curved bracket close")
 
         table_stack_pop(data->table_stack);
 
@@ -500,12 +512,12 @@ int stm(parser_data_t *data) {
         hash_table *local_table = create_hash_table();
         table_stack_push(data->table_stack,local_table);
 
-        if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) PRINT_SYNTAX_ERROR("Waiting curved bracket open")
 
         GET_TOKEN()
         CHECK_RULE(stm)
 
-        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) PRINT_SYNTAX_ERROR("Waiting curved bracket close")
 
         table_stack_pop(data->table_stack);
 
@@ -517,10 +529,11 @@ int stm(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
         if (data->is_void_function) {
             CHECK_RULE(return_void_rule)
-            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_FUNC_RETURN;
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) PRINT_SYNTAX_ERROR("Waiting curved bracket close")
         }
         else {
             CHECK_RULE(return_rule)
+            // bug?
             if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return stm(data);
         }
         data->func_id = NULL;
@@ -568,7 +581,7 @@ int call_params_n(parser_data_t *data) {
         return ER_NONE;
     }
     else {
-        return ER_SYNTAX;
+        PRINT_SYNTAX_ERROR("Waiting Comma or Bracket close")
     }
 
     return ER_NONE;
@@ -655,7 +668,7 @@ int func_params(parser_data_t *data) {
 
             *(data->exp_type) = tmp_item;
         } else
-            return ER_SYNTAX;
+            PRINT_SYNTAX_ERROR("waiting ID or Underline")
 
         VERIFY_TOKEN(T_COLON)
 
@@ -696,7 +709,7 @@ int func_params_not_null(parser_data_t *data) {
         return ER_NONE;
     }
     else {
-        return ER_SYNTAX;
+        PRINT_SYNTAX_ERROR("Waiting next function params or Bracket close")
     }
 
     return ER_NONE;
@@ -704,23 +717,26 @@ int func_params_not_null(parser_data_t *data) {
 
 // <nil_flag> -> ! + ε
 int nil_flag(parser_data_t *data) {
+    int ret_code = ER_NONE;
     if (data->token_ptr->token_type == T_EXCLAMATION_MARK) {
         return ER_NONE;
     }
-    else if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) {
+    else if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) {     // bug?
         return ER_NONE;
     }
-    else return ER_SYNTAX;
+    ret_code = ER_SYNTAX;
+    PRINT_SYNTAX_ERROR("Waiting ! or ")
 }
 
 // <return> -> return <expression> <nil_flag>
 int return_rule(parser_data_t *data) {
-    int ret_code;
+    int ret_code = ER_NONE;
 
-    if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return)) return ER_SYNTAX;
+    if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return))
+        PRINT_SYNTAX_ERROR("Waiting non a Keyword or return")
     GET_TOKEN()
     if(data->func_id == NULL)
-        return ER_SYNTAX;
+        PRINT_SYNTAX_ERROR("Waiting return is placed other of body")
     data->id = data->func_id;
 
     if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) return ER_FUNC_RETURN;
@@ -743,7 +759,7 @@ int return_void_rule(parser_data_t *data) {
         return ER_NONE;
     }
     else {
-        return ER_SYNTAX;
+        PRINT_SYNTAX_ERROR("Waiting 'nothing' or return")
     }
 }
 
@@ -854,12 +870,14 @@ int insert_data_type(parser_data_t *data){
 }
 
 int var_type(parser_data_t* data) {
+    int ret_code = ER_NONE;
     if (data->token_ptr->token_type == T_KEYWORD || data->token_ptr->token_type == T_KEYWORD_NIL_POSSIBILITY)
     {
         insert_data_type(data);
     }
     else {
-        return ER_SYNTAX;
+        ret_code = ER_SYNTAX;
+        PRINT_SYNTAX_ERROR("Waiting keyword or variable doesnt have nil_flag")
     }
     return ER_NONE;
 }

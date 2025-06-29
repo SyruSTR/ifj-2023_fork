@@ -14,7 +14,7 @@ SEM_TESTS = ./semantic_tests/*
 all: main
 
 main: $(PARSER_PROGS) $(PROGS) src/main.c
-	$(CC) $(CFLAGS) $^ -o $@ -lm
+	$(CC) $(CFLAGS) $^ -o $@ -lm -DFOR_LSP
 
 scanner-build: $(PROGS) tests/scanner_tests.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm
