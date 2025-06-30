@@ -7,7 +7,7 @@
 #ifndef ERROR_HEADER_G
 #define ERROR_HEADER_G
 
-#define PRINT_MESSAGE_AND_EXIT_FULL(message, error_code, line, char, token_type, token_string) {fprintf(stderr, "{\n\terror_code : %d,\n\tmessage : \"%s\",\n\tline : %d,char_pos : %d,\n\ttoken_type : %d,\n\ttoken_string : \"%s\"\n}",error_code,message,line,char,token_type,token_string ); \
+#define PRINT_MESSAGE_AND_EXIT_FULL(message, error_code, line, char, token_type, token_string) {fprintf(stderr, "{\n\t\"error_code\" : %d,\n\t\"message\" : \"%s\",\n\t\"line\" : %d,\n\t\"char_pos\" : %d,\n\t\"token_type\" : %d,\n\t\"token_string\" : \"%s\"\n}",error_code,message,line,char,token_type,token_string ); \
     return error_code;}
 
 #define PRINT_MESSAGE_AND_EXIT_SHORT(message,error_code) PRINT_MESSAGE_AND_EXIT_FULL(message,error_code,-1,-1,0,"")
