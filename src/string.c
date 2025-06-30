@@ -76,6 +76,7 @@ bool string_concat(string_ptr string, const char* src)
 
         if (!(string->string = realloc(string->string, string->mem_allocated)))
             return false;
+        memset(string->string, 0, string->mem_allocated);
     }
 
     strcat(string->string, src);
