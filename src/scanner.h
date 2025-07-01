@@ -138,6 +138,7 @@ typedef struct token
     attribute_t attribute;
     unsigned int line;
     string_ptr string;
+    int token_start_pos;
 } *token_t_ptr;
 
 /**

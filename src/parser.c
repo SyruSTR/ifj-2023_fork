@@ -16,7 +16,7 @@
 void print_json_message(char* message, const parser_data_t* data, const int ret_code) {
     string_ptr tmp_str = string_init();
     (data->token_ptr->string == NULL || data->token_ptr->string->string == NULL)  ? string_concat(tmp_str,"null") : string_concat(tmp_str,data->token_ptr->string->string);
-    fprintf(stderr,"{\n\t\"error_code\" : %d,\n\t\"message\" : \"%s\",\n\t\"line\" : %d,\n\t\"char_pos\" : %d,\n\t\"token_type\" : %d,\n\t\"token_string\" : \"%s\"\n}",ret_code,message,data->line_cnt - 1,data->current_char_pos,data->token_ptr->token_type,tmp_str->string);
+    fprintf(stderr,"{\n\t\"error_code\" : %d,\n\t\"message\" : \"%s\",\n\t\"line\" : %d,\n\t\"char_pos\" : %d,\n\t\"token_type\" : %d,\n\t\"token_string\" : \"%s\"\n}",ret_code,message,data->line_cnt,data->token_ptr->token_start_pos,data->token_ptr->token_type,tmp_str->string);
 }
 
 #define PRINT_SYNTAX_ERROR(message) {ret_code = ER_SYNTAX; print_json_message(message,data,ret_code); return ret_code;}
@@ -318,6 +318,7 @@ int stm(parser_data_t *data) {
                 return stm(data);
             }
             else {
+                ret_code = ER_SYNTAX;
                 print_json_message("Wainting Assigment or EOL",data,ret_code);
                 return ret_code;
             }
