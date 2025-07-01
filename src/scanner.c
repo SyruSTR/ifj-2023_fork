@@ -9,7 +9,7 @@
 #include "scanner.h"
 
 #define RETURN_CHAR() ungetc(c,stdin); \
-                    (*char_pos)--;
+                    (*current_char_pos)--;
 
 token_t_ptr create_token(){
     token_t_ptr token;
@@ -104,7 +104,7 @@ bool keyword_control(token_t_ptr token, string_ptr add_string){
     return false;
 }
 // TODO: changes in scanner (flag for EOL)
-token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
+token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* current_char_pos){
 
     int c;
 
@@ -132,7 +132,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
     unsigned quot_count = 0;
     *flag = false;
     while((c = getc(stdin))){
-        (*char_pos)++;
+        (*current_char_pos)++;
         if(c == 13){
             continue;
         }
