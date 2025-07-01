@@ -8,6 +8,9 @@
 #include "error.h"
 #include "scanner.h"
 
+#define RETURN_CHAR() ungetc(c,stdin); \
+                    (*char_pos)--;
+
 token_t_ptr create_token(){
     token_t_ptr token;
     token = (token_t_ptr) malloc(sizeof(struct token));
@@ -103,7 +106,6 @@ bool keyword_control(token_t_ptr token, string_ptr add_string){
 // TODO: changes in scanner (flag for EOL)
 token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
 
-    *char_pos = 0;
     int c;
 
     int comment_count = 0;
@@ -139,7 +141,6 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                 if(c == '\n'){
                     (*line_cnt)++;
                     *flag = true;
-                    *char_pos = 0;
                     continue;
                 }
                 else if(isspace(c))
@@ -267,13 +268,13 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     comment_count++;
                     continue;
                 } else{
-                    ungetc(c,stdin);
+                    RETURN_CHAR()
                     single_token(token,*line_cnt,T_DIVISION,additional_string);
                     return token;
                 }
             case (S_COMMENT_STRING):
                 if(c == '\n' || c == EOF){
-                    ungetc(c,stdin);
+                    RETURN_CHAR()
                     state = S_START;
                     continue;
                 }
@@ -324,7 +325,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     single_token(token,*line_cnt,T_MORE_EQUAL,additional_string);
                     return token;
                 } else{
-                    ungetc(c,stdin);
+                    RETURN_CHAR()
                     single_token(token,*line_cnt,T_MORE,additional_string);
                     return token;
                 }
@@ -333,7 +334,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     single_token(token,*line_cnt,T_LESS_EQUAL,additional_string);
                     return token;
                 } else{
-                    ungetc(c,stdin);
+                    RETURN_CHAR()
                     single_token(token,*line_cnt,T_LESS,additional_string);
                     return token;
                 }
@@ -342,7 +343,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     single_token(token,*line_cnt,T_NOT_EQUAL,additional_string);
                     return token;
                 } else{
-                    ungetc(c,stdin);
+                    RETURN_CHAR()
                     single_token(token,*line_cnt,T_EXCLAMATION_MARK,additional_string);
                     return token;
                 }
@@ -372,7 +373,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     continue;
                 }
                 else{
-                    ungetc(c, stdin);
+                    RETURN_CHAR()
                     token->attribute.integer = atoi(additional_string->string);
                     single_token(token,*line_cnt,T_INT,additional_string);
                     return token;
@@ -412,7 +413,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     return NULL;
                 }
                 else{
-                    ungetc(c, stdin);
+                    RETURN_CHAR()
                     token->attribute.decimal = strtod(additional_string->string,NULL);
                     single_token(token, *line_cnt, T_DECIMAL, additional_string);
                     return token;
@@ -461,7 +462,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     continue;
                 }
                 else{
-                    ungetc(c, stdin);
+                    RETURN_CHAR()
                     token->attribute.decimal = strtod(additional_string->string,NULL);
                     single_token(token,*line_cnt,T_EXPONENT,additional_string);
                     return token;
@@ -490,7 +491,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     state = S_ID;
                     continue;
                 } else{
-                    ungetc(c, stdin);
+                    RETURN_CHAR()
                     if((additional_string = string_init()) == NULL){
                         scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
                         return NULL;
@@ -526,7 +527,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     return token;
                 }
                 else{
-                    ungetc(c, stdin);
+                    RETURN_CHAR()
                     if(keyword_control(token,additional_string))
                         single_token(token,*line_cnt,T_KEYWORD,additional_string);
                     else{
@@ -545,7 +546,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     single_token(token,*line_cnt,T_ARROW,additional_string);
                     return token;
                 } else{
-                    ungetc(c, stdin);
+                    RETURN_CHAR()
                     single_token(token, *line_cnt, T_MINUS,additional_string);
                     return token;
                 }
@@ -554,7 +555,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     single_token(token,*line_cnt,T_EQUALS,additional_string);
                     return token;
                 } else{
-                    ungetc(c, stdin);
+                    RETURN_CHAR()
                     single_token(token,*line_cnt,T_ASSIGMENT,additional_string);
                     return token;
                 }
@@ -732,7 +733,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* char_pos){
                     continue;
                 }
                 else if(additional_string != NULL){
-                    ungetc(c,stdin);
+                    RETURN_CHAR()
                     if(additional_string->string == NULL)
                         token->attribute.string = "";
                     else{
