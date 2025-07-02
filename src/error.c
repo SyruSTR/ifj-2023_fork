@@ -170,3 +170,17 @@ void print_type_comp_nil_error(const parser_data_t* data) {
     IT_NIL
     );
 }
+
+void print_inference_error(const parser_data_t* data) {
+    const error_t code = ER_INFERENCE;
+    print_error("{\n\t\"error_code\": %d,"
+        "\n\t\"line\": %d,"
+        "\n\t\"char_pos\": %d,"
+        "\n\t\"message\": \"%s\""
+        "\n}\n",
+    code,
+    data->line_cnt,
+    data->token_start_pos,
+    "Cant resolve the output type, use operand '!'"
+    );
+}

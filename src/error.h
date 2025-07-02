@@ -19,6 +19,8 @@
 
 #define PRINT_TYPE_COMP_NIL() {print_type_comp_nil_error(data); return ER_TYPE_COMP;}
 
+#define PRINT_INFERENCE() {print_inference_error(data); return ER_INFERENCE;}
+
 /**
  * @brief enum for readable code errors
  */
@@ -59,5 +61,7 @@ void print_func_return_error(const char* function_name);
 void print_type_comp_error(const parser_data_t* data,item_type actual_type,item_type expected_type);
 
 void print_type_comp_nil_error(const parser_data_t* data);
+
+void print_inference_error(const parser_data_t* data);
 
 #endif

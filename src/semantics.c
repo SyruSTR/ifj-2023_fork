@@ -866,7 +866,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             }
 
             if(operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL)
-                return ER_INFERENCE;
+                PRINT_INFERENCE()
 
             if(operand_1->item.type == IT_UNDEF){
                 operand_1->item.type = operand_3->item.type;
