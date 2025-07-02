@@ -33,11 +33,14 @@ void print_json_message(char* message, const parser_data_t* data, const int ret_
         return ret_code;            \
     }                              \
 
-#define VERIFY_TOKEN(t_token)  \
-    GET_TOKEN()                \
-    if (data->token_ptr->token_type != t_token) PRINT_SYNTAX_ERROR("Syntax ERROR");\
-                               \
+char tmp_str[100];
 
+#define VERIFY_TOKEN(t_token, message)  \
+    GET_TOKEN()                \
+    memset(tmp_str,'\0',100);\
+    strcat(tmp_str,"syntax Error: "); strcat(tmp_str,message); \
+    if (data->token_ptr->token_type != t_token) PRINT_SYNTAX_ERROR(tmp_str);\
+                               \
 
 #define INSERT_SYM() \
         bool internal_error; \
@@ -287,7 +290,7 @@ int stm(parser_data_t *data) {
     // <stm> -> var + let id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && ( data->token_ptr->attribute.keyword == k_var || (is_let = data->token_ptr->attribute.keyword == k_let))) {
         data->is_in_declaration = true;
-        VERIFY_TOKEN(T_ID)
+        VERIFY_TOKEN(T_ID,"Cant was verified ID")
         INSERT_SYM()
         if(table_count_elements_in_stack(data->table_stack) == 1)
             data->id->global = true;
@@ -330,7 +333,7 @@ int stm(parser_data_t *data) {
             data->is_in_declaration = false;
             if(data->eol_flag)
                 return stm(data);
-            VERIFY_TOKEN(T_EOF)
+            VERIFY_TOKEN(T_EOF,"Cant was verified EOF")
             return ER_NONE;
         }
         else PRINT_SYNTAX_ERROR("Waiting Colon or Assigment")
@@ -394,7 +397,7 @@ int stm(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
         if(data->func_id != NULL)
             return ER_OTHER_SEM;
-        VERIFY_TOKEN(T_ID)
+        VERIFY_TOKEN(T_ID,"Cant was verified ID")
         data->is_in_declaration = true;
 
         symbol *idFromTable = NULL;
@@ -406,7 +409,7 @@ int stm(parser_data_t *data) {
 
         INSERT_SYM()
         data->func_id = data->id;
-        VERIFY_TOKEN(T_BRACKET_OPEN)
+        VERIFY_TOKEN(T_BRACKET_OPEN,"Cant was verified '('")
         data->is_in_params = true;
         data->param_index = 0;
         data->id->is_function = true;
@@ -432,7 +435,7 @@ int stm(parser_data_t *data) {
             CHECK_RULE(var_type)
             data->is_in_function = false;
 
-            VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
+            VERIFY_TOKEN(T_CURVED_BRACKET_OPEN,"Cant was verified '}'")
 
             GET_TOKEN()
             CHECK_RULE(stm)
@@ -489,7 +492,7 @@ int stm(parser_data_t *data) {
         local_table = create_hash_table();
         table_stack_push(data->table_stack,local_table);
 
-        VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
+        VERIFY_TOKEN(T_CURVED_BRACKET_OPEN,"Cant was verified '{'")
 
         GET_TOKEN()
         CHECK_RULE(stm)
@@ -595,7 +598,7 @@ int condition(parser_data_t *data) {
     int ret_code = ER_NONE;
 
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
-        VERIFY_TOKEN(T_ID)
+        VERIFY_TOKEN(T_ID,"Cant was verified ID")
         if(table_count_elements_in_stack(data->table_stack) == 0)
             return ER_INTERNAL;
         if (!find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string)) {
@@ -611,7 +614,7 @@ int condition(parser_data_t *data) {
     CHECK_RULE(expression)
 
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
-        VERIFY_TOKEN(T_ID)
+        VERIFY_TOKEN(T_ID,"Cant was verified ID")
     }
 
     return ret_code;
@@ -672,7 +675,7 @@ int func_params(parser_data_t *data) {
         } else
             PRINT_SYNTAX_ERROR("waiting ID or Underline")
 
-        VERIFY_TOKEN(T_COLON)
+        VERIFY_TOKEN(T_COLON,"Cant was verified ':'")
 
         GET_TOKEN()
         CHECK_RULE(var_type)
