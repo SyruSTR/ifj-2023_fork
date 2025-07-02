@@ -37,10 +37,10 @@ char tmp_str[100];
 #define INSERT_SYM() \
         bool internal_error; \
         if(table_count_elements_in_stack(data->table_stack) == 0)\
-            return ER_INTERNAL;\
+            PRINT_INTERNAL();\
         data->id = insert_symbol(data->table_stack->top->table,data->token_ptr->attribute.string,&internal_error);\
         if(!data->id){\
-            if(internal_error) return ER_INTERNAL;\
+            if(internal_error) PRINT_INTERNAL()\
         else PRINT_UNDEF_FUNC_OR_NOT_INIT_VARIABLE()\
 }                       \
 
@@ -237,31 +237,33 @@ int analyse() {
 
     string_ptr string;
     if ((string = string_init()) == NULL)
-        return ER_INTERNAL;
+        PRINT_INTERNAL_NULL_DATA(((void *)0));
 
-    parser_data_t *parser_data;
-    if ((parser_data = init_data()) == NULL)
+    parser_data_t *data;
+    if ((data = init_data()) == NULL)
     {
         string_free(string);
-        return ER_INTERNAL;
+        PRINT_INTERNAL()
     }
 
-    parser_data->line_cnt = 1;
+    data->line_cnt = 1;
 
     generator_start();
 
-    if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code, &flag,&parser_data->current_char_pos, &parser_data->token_start_pos)) != NULL)
+    if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &flag,&data->current_char_pos, &data->token_start_pos)) != NULL)
     {
-        ret_code = program(parser_data);
+        ret_code = program(data);
     }
     else {
-        print_lexical_error(parser_data->line_cnt,parser_data->token_start_pos,"Lex Error");
+        print_lexical_error(data->line_cnt,data->token_start_pos,"Lex Error");
     }
 
     generator_end();
+    //
+    // if ( ret_code > 0) PRINT_UNRESOLVED(ret_code)
 
     string_free(string);
-    free_data(parser_data);
+    free_data(data);
 
     return ret_code;
 }
@@ -339,7 +341,7 @@ int stm(parser_data_t *data) {
     // <stm> -> id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_ID) {
         if(table_count_elements_in_stack(data->table_stack) == 0)
-            return ER_INTERNAL;
+            PRINT_INTERNAL()
         symbol *idFromTable = NULL;
 
         char *var_name = data->token_ptr->attribute.string;
@@ -550,6 +552,7 @@ int  call_params(parser_data_t *data) {
     int ret_code = ER_NONE;
 
     if((ret_code = check_func_call(data,data->param_index))){
+        // todo check it
         return ret_code;
     }
 
@@ -597,7 +600,7 @@ int condition(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
         VERIFY_TOKEN(T_ID)
         if(table_count_elements_in_stack(data->table_stack) == 0)
-            return ER_INTERNAL;
+            PRINT_INTERNAL()
         if (!find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string)) {
             PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string);
         }
@@ -625,13 +628,13 @@ int func_params(parser_data_t *data) {
 
 
     if ((data->id->id_names = (char**)realloc(data->id->id_names,(data->param_index+1) * sizeof(char*)))==NULL)
-        return ER_INTERNAL;
+        PRINT_INTERNAL()
     GET_TOKEN()
 
 
     if(data->token_ptr->token_type == T_UNDERLINE || data->token_ptr->token_type == T_ID){
         if((data->id->id_names[data->param_index] = (char*)realloc(data->id->id_names[data->param_index],strlen(data->token_ptr->attribute.string))) == NULL)
-            return ER_INTERNAL;
+            PRINT_INTERNAL()
         if(data->token_ptr->token_type == T_UNDERLINE)
             strcpy(data->id->id_names[data->param_index],"_");
         else
@@ -646,17 +649,17 @@ int func_params(parser_data_t *data) {
             }
             // if there is function named as parameter
             if(table_count_elements_in_stack(data->table_stack) != 2)
-                return ER_INTERNAL;
+                PRINT_INTERNAL()
             if (find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string))
                 PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string);
 
             // if we are in definition, we need to add_LitInt_LitInt parameters to the local symtable
             bool internal_error;
             if(table_count_elements_in_stack(data->table_stack) == 0)
-                return ER_INTERNAL;
+                PRINT_INTERNAL()
             if (!(data->exp_type = insert_symbol(data->table_stack->top->table, data->token_ptr->attribute.string,
                                              &internal_error))) {
-                if (internal_error) return ER_INTERNAL;
+                if (internal_error) PRINT_INTERNAL()
                 else PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string)
             }
             data->exp_type->defined = true;
@@ -665,7 +668,7 @@ int func_params(parser_data_t *data) {
             item_data tmp_item = create_default_item();
 
             if((data->exp_type = (item_data *) malloc(sizeof(item_data))) == NULL) {
-                return ER_INTERNAL;
+                PRINT_INTERNAL()
             }
 
             *(data->exp_type) = tmp_item;
@@ -858,10 +861,10 @@ int insert_data_type(parser_data_t *data){
                 data_type_for_func_params = 'd' - ((data->token_ptr->token_type == T_KEYWORD_NIL_POSSIBILITY) * 32);
                 break;
             default:
-                return ER_INTERNAL;
+                PRINT_INTERNAL()
         }
         if (!string_append(data->id->params, data_type_for_func_params)) {
-            return ER_INTERNAL;
+            PRINT_INTERNAL()
         }
         data->exp_type->type = type;
     }

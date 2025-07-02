@@ -211,3 +211,27 @@ void print_unresolved_error(const parser_data_t* data, const int code) {
     "Unresolved error"
     );
 }
+
+void print_internal_error(const parser_data_t* data) {
+    int code = ER_INTERNAL;
+    if (data == NULL) {
+        print_error("{\n\t\"error_code\": %d,"
+            "\n\t\"message\": \"%s\""
+            "\n}\n",
+        code,
+        "Internal error"
+        );
+    }
+    else {
+        print_error("{\n\t\"error_code\": %d,"
+            "\n\t\"line\": %d,"
+            "\n\t\"char_pos\": %d,"
+            "\n\t\"message\": \"%s\""
+            "\n}\n",
+        code,
+        data->line_cnt,
+        data->token_start_pos,
+        "Internal error"
+        );
+    }
+}

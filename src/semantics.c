@@ -38,7 +38,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
     do{                   \
         stack_free(&stack); \
         \
-        return _error_code;   \
+        PRINT_UNRESOLVED(_error_code)   \
         }\
     while(0) \
 
@@ -340,7 +340,7 @@ int reduce(parser_data_t* data){
 #ifdef FOR_LSP
             fprintf(stderr, "Wrong Types\n");
 #endif
-            return ret_code;
+            PRINT_UNRESOLVED(ret_code)
         }
         if(rule == NT_PLUS_NT && final_item.type == IT_STRING)
             gen_concat_stack_strings();
@@ -394,7 +394,8 @@ int expression(parser_data_t* data){
 
                 data->param_index = 0;
 
-                if ((ret_code = call_params(data))) return ret_code;
+                if ((ret_code = call_params(data)))
+                    PRINT_UNRESOLVED(ret_code);
 
                 if (data->token_ptr->token_type != T_BRACKET_CLOSE) PRINT_SYNTAX_ERROR("Waiting ')'")
 
@@ -405,7 +406,7 @@ int expression(parser_data_t* data){
         }
         actual_symbol = convert_token_into_symbol(data,last_action_is_reduce);
         if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let && !data->eol_flag)
-            return ret_code;
+            PRINT_UNRESOLVED(ret_code);
         if(top_terminal == NULL){
 #ifdef SEM_DEBUG
             printf("semantic analysis finish with error\n");
@@ -538,7 +539,8 @@ int expression(parser_data_t* data){
 
     }while(!success);
 
-    if (ret_code == 2) return ret_code;
+    // wtf??
+    if (ret_code == 2) PRINT_UNRESOLVED(ret_code);
 
     t_stack_elem op1;
     op1.symbol = N_TERMINAL;
@@ -905,7 +907,7 @@ int check_param(parser_data_t* data, int position){
     if(data->token_ptr->token_type == T_ID){
         symbol* sym = NULL;
         if(table_count_elements_in_stack(data->table_stack) == 0)
-            return ER_INTERNAL;
+            PRINT_INTERNAL();
 
         if((sym = find_symbol_global(data->table_stack,data->token_ptr->attribute.string, !strcmp(data->id->id,data->token_ptr->attribute.string))) != NULL){
             bool param_nil_possibility = false;
