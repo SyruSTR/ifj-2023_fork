@@ -99,7 +99,11 @@ def test(input_code: str, expected_output: str, program_stdin: str = "",
 
     def print_compiler_info():
         print_red("compiler stdin:")
-        print(input_code)
+        if not compiler_stderr:
+            print("check it")
+            print_green_bold(input_code)
+        else:
+            print(input_code)
         # print_red("compiler stdout:")
         # print(compiler_stdout.decode())
         print_red("compiler stderr:")
@@ -116,9 +120,10 @@ def test(input_code: str, expected_output: str, program_stdin: str = "",
         return
     # find unresolved errors
     else:
-        if not compiler_stderr:
-            print_red_bold("compiler stdin:")
-            print(input_code)
+        if not compiler_stderr and compiler_return_code != ErrorType.success:
+            print("check it")
+            print_green_bold("compiler stdin:")
+            print_green_bold(input_code)
 
     if compiler_return_code != ErrorType.success:
         return
