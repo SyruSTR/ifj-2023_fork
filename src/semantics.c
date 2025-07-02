@@ -17,6 +17,8 @@
 
 #define PRINT_ERROR_PARAMS_ARGS_MISMATCH(actual,expected) {print_params_error_args_mismatch(data,actual,expected); return ER_PARAMS;}
 
+#define PRINT_NOT_INIT_VAR(var_name) {print_not_init_variable_error(data,var_name); return ER_UNDEF_VAR_OR_NOTINIT_VAR;}
+
 t_stack stack;
 
 static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3);
@@ -915,10 +917,11 @@ int check_param(parser_data_t* data, int position){
                 return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         }
         else{
+            string_ptr var_name = data->token_ptr->string;
             GET_TOKEN()
             if(data->token_ptr->token_type == T_COLON)
                 return ER_OTHER_SEM;
-            return ER_UNDEF_VAR_OR_NOTINIT_VAR;
+            PRINT_NOT_INIT_VAR(var_name->string);
         }
 
     } else{

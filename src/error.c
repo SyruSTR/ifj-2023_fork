@@ -114,3 +114,17 @@ void print_params_error_args_mismatch(const parser_data_t* data,int actual_args,
     actual_args// counting from 0
     );
 }
+
+void print_not_init_variable_error(const parser_data_t* data, char* var_name) {
+    const int code = ER_UNDEF_VAR;
+    print_error("{\n\t\"error_code\": %d,"
+        "\n\t\"line\": %d,"
+        "\n\t\"char_pos\": %d,"
+        "\n\t\"variable_name\": \"%s\""
+        "\n}\n",
+    code,
+    data->line_cnt,
+    data->token_start_pos,
+    var_name
+    );
+}
