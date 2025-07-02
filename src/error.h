@@ -41,4 +41,6 @@ void print_undef_func_or_redef_var_error(const parser_data_t* data);
 
 void print_params_error_type_mismatch(const parser_data_t* data,item_type actual_type, item_type expected_type);
 
+void print_params_error_args_mismatch(const parser_data_t* data,int actual_args, int expected_args);
+
 #endif

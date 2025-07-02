@@ -63,7 +63,7 @@ void print_undef_func_or_redef_var_error(const parser_data_t* data) {
             tmp_bool);
 }
 
-void print_params_error_type_mismatch(const parser_data_t* data,item_type actual_type, item_type expected_type){
+void print_params_error_type_mismatch(const parser_data_t* data, const item_type actual_type, const item_type expected_type) {
     const error_t code = ER_PARAMS;
     // print_error("{\n\t\"error_code\": %d,"
     //             "\n\t\"line\": %d,"
@@ -87,12 +87,30 @@ void print_params_error_type_mismatch(const parser_data_t* data,item_type actual
             "\n\t\"function_name\": \"%s\","
             "\n\t\"actual_param_type\": \"%d\","
             "\n\t\"expected_param_type\": \"%d\""
-            "}\n",
+            "\n}\n",
     code,
     data->line_cnt,
     data->token_start_pos,
     data->id_type->id,
     actual_type,
     expected_type
+    );
+}
+
+void print_params_error_args_mismatch(const parser_data_t* data,int actual_args, const int expected_args) {
+    const error_t code = ER_PARAMS;
+    print_error("{\n\t\"error_code\": %d,"
+        "\n\t\"line\": %d,"
+        "\n\t\"char_pos\": %d,"
+        "\n\t\"function_name\": \"%s\","
+        "\n\t\"expected_func_args\":%d,"
+        "\n\t\"actual_func_args\":%d"
+        "\n}\n",
+    code,
+    data->line_cnt,
+    data->token_start_pos,
+    data->id_type->id,
+    expected_args,
+    actual_args// counting from 0
     );
 }

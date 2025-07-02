@@ -15,6 +15,8 @@
 
 #define PRINT_ERROR_PARAMS_TYPE_MISMATCH(actual,expected) {print_params_error_type_mismatch(data,actual,expected); return ER_PARAMS;}
 
+#define PRINT_ERROR_PARAMS_ARGS_MISMATCH(actual,expected) {print_params_error_args_mismatch(data,actual,expected); return ER_PARAMS;}
+
 t_stack stack;
 
 static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3);
@@ -948,7 +950,7 @@ int check_func_call(parser_data_t *data, int position){
     if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id_type->params->string == NULL)
         return ER_PARAMS;
     else if(data->token_ptr->token_type == T_BRACKET_CLOSE && data->param_index != data->id_type->params->last_index)
-        return ER_PARAMS;
+        PRINT_ERROR_PARAMS_ARGS_MISMATCH(data->param_index,data->id_type->params->last_index)
     else if(data->token_ptr->token_type == T_ID){
 
         if(data->id_type->id_names && !strcmp(data->id_type->id_names[position],data->token_ptr->attribute.string)){
@@ -968,7 +970,7 @@ int check_func_call(parser_data_t *data, int position){
             || data->token_ptr->token_type == T_STRING
             || (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_nil)){
         if(position+1 > data->id_type->params->last_index && !its_write)
-            return ER_PARAMS;
+            PRINT_ERROR_PARAMS_ARGS_MISMATCH(position+1,data->id_type->params->last_index)
         else if(data->id_type->id_names && strcmp(data->id_type->id_names[position],"_"))
             return ER_OTHER_SEM;
         return check_param(data,position);
