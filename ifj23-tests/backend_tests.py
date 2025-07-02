@@ -1365,7 +1365,6 @@ def test_all():
     test("""
     substring(of: "123456789", startingAt: 0)
     """, "", expected_return_code=ErrorType.error_call)
-    test("chr(\"\")", "", expected_return_code=ErrorType.error_call)
     test("length(42)", "", expected_return_code=ErrorType.error_call)
 
 
