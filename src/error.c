@@ -115,8 +115,8 @@ void print_params_error_args_mismatch(const parser_data_t* data,int actual_args,
     );
 }
 
-void print_not_init_variable_error(const parser_data_t* data, char* var_name) {
-    const int code = ER_UNDEF_VAR;
+void print_undef_or_not_init_variable_error(const parser_data_t* data, char* var_name) {
+    const int code = ER_UNDEF_VAR_OR_NOTINIT_VAR;
     print_error("{\n\t\"error_code\": %d,"
         "\n\t\"line\": %d,"
         "\n\t\"char_pos\": %d,"

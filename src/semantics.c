@@ -17,14 +17,13 @@
 
 #define PRINT_ERROR_PARAMS_ARGS_MISMATCH(actual,expected) {print_params_error_args_mismatch(data,actual,expected); return ER_PARAMS;}
 
-#define PRINT_NOT_INIT_VAR(var_name) {print_not_init_variable_error(data,var_name); return ER_UNDEF_VAR_OR_NOTINIT_VAR;}
 
 t_stack stack;
 
 static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3);
 
 static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3,
-                           item_data *type_final);
+                           item_data *type_final, parser_data_t* data);
 
 #define GET_TOKEN() \
         if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag),&data->current_char_pos,&data->token_start_pos)) == NULL) {\
@@ -289,7 +288,7 @@ int number_of_symbols_after_stop(bool* found_stop){
  * @brief Reduce the stack based on precedence rules
  * @return Error code indicating success or failure
  */
-int reduce(){
+int reduce(parser_data_t* data){
 
     int ret_code;
 
@@ -333,7 +332,7 @@ int reduce(){
     else{
         //todo check semantics
 
-        if ((ret_code = check_semantics(rule, op1, op2, op3, &final_item))){
+        if ((ret_code = check_semantics(rule, op1, op2, op3, &final_item, data))){
 #ifdef SEM_DEBUG
             printf("wrong types\n");
 #endif
@@ -420,7 +419,7 @@ int expression(parser_data_t* data){
             case '=':
                 tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
-                    return ER_UNDEF_VAR_OR_NOTINIT_VAR;
+                    PRINT_UNDEF_OR_NOT_INIT_VAR(tmp_item.id);
 
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
@@ -464,7 +463,7 @@ int expression(parser_data_t* data){
                 }
                 tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
-                    return ER_UNDEF_VAR_OR_NOTINIT_VAR;
+                    PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->string->string);
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -502,7 +501,7 @@ int expression(parser_data_t* data){
                     last_action_is_reduce = false;
                 break;
             case '>':
-                if((ret_code = reduce()))
+                if((ret_code = reduce(data)))
                 {
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
@@ -547,7 +546,7 @@ int expression(parser_data_t* data){
     t_stack_elem op3;
     op3 = *(stack.top);
     item_data final_type = create_default_item();
-    if((ret_code =check_semantics(NT_AS_NT,&op1,&op2,&op3,&final_type))){
+    if((ret_code =check_semantics(NT_AS_NT,&op1,&op2,&op3,&final_type, data))){
 #ifdef SEM_DEBUG
         printf("semantic analysis finish with error\n");
 #endif
@@ -669,7 +668,7 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
  * @return Error code indicating success or failure
  */
 static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3,
-                    item_data *type_final){
+                    item_data *type_final, parser_data_t* data){
 
     type_final->type = IT_UNDEF;
     bool operand_1_to_double = false;
@@ -677,16 +676,17 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
     if (rule == OPERAND){
         if (operand_1->item.type == IT_UNDEF && !operand_1->item.is_function){
-            return ER_UNDEF_VAR_OR_NOTINIT_VAR;
+            PRINT_UNDEF_OR_NOT_INIT_VAR(operand_1->item.id);
         }
     }
 
     if (rule == LBR_NT_RBR){
         if (operand_2->item.type == IT_UNDEF){
-            return ER_UNDEF_VAR_OR_NOTINIT_VAR;
+            PRINT_UNDEF_OR_NOT_INIT_VAR(operand_2->item.id);
         }
     }
 
+    // strange rule
     if (rule != OPERAND && rule != LBR_NT_RBR && rule != NT_AS_NT){
         if (operand_1->item.type == IT_UNDEF || ( operand_3 != NULL && operand_3->item.type == IT_UNDEF)){
             return ER_UNDEF_VAR_OR_NOTINIT_VAR;
@@ -789,7 +789,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_F_UNWRAP:
 
             if (operand_1->item.type == IT_UNDEF) {
-                return ER_UNDEF_VAR_OR_NOTINIT_VAR;
+                PRINT_UNDEF_OR_NOT_INIT_VAR(operand_1->item.id);
             }
             if(operand_1->item.type == IT_NIL)
                 return ER_TYPE_COMP;
@@ -914,14 +914,14 @@ int check_param(parser_data_t* data, int position){
                 return ER_NONE;
             }
             else
-                return ER_UNDEF_VAR_OR_NOTINIT_VAR;
+                PRINT_UNDEF_OR_NOT_INIT_VAR(sym->data.id);
         }
         else{
             string_ptr var_name = data->token_ptr->string;
             GET_TOKEN()
             if(data->token_ptr->token_type == T_COLON)
                 return ER_OTHER_SEM;
-            PRINT_NOT_INIT_VAR(var_name->string);
+            PRINT_UNDEF_OR_NOT_INIT_VAR(var_name->string);
         }
 
     } else{

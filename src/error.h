@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "parser.h"
 
+#define PRINT_UNDEF_OR_NOT_INIT_VAR(var_name) {print_undef_or_not_init_variable_error(data,var_name); return ER_UNDEF_VAR_OR_NOTINIT_VAR;}
 
 /**
  * @brief enum for readable code errors
@@ -28,7 +29,6 @@ typedef enum error{
     ER_OTHER_SEM       = 9,
     ER_PARAMS_ARGS_MISMATCH = 40, // for LSP
     ER_PARAMS_TYPE_MISMATCH = 41, // for LSP
-    ER_UNDEF_VAR = 50, // for LSP
     ER_INTERNAL      = 99
 } error_t;
 
@@ -46,8 +46,6 @@ void print_params_error_type_mismatch(const parser_data_t* data,item_type actual
 
 void print_params_error_args_mismatch(const parser_data_t* data,int actual_args, int expected_args);
 
-void print_not_init_variable_error(const parser_data_t* data, char* var_name);
-
-void print_undef_var_error(const parser_data_t* data, char* var_name);
+void print_undef_or_not_init_variable_error(const parser_data_t* data, char* var_name);
 
 #endif
