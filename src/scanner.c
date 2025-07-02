@@ -277,6 +277,10 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag, int* current_ch
                     single_token(token,*line_cnt,T_DIVISION,additional_string);
                     return token;
                 }
+                else {
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
+                    return NULL;
+                }
             case (S_COMMENT_STRING):
                 if(c == '\n' || c == EOF){
                     RETURN_CHAR()
