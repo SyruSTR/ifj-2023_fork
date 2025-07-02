@@ -13,6 +13,8 @@
 
 #define TABLE_SIZE 16
 
+#define PRINT_ERROR_PARAMS_TYPE_MISMATCH(actual,expected) {print_params_error_type_mismatch(data,actual,expected); return ER_PARAMS;}
+
 t_stack stack;
 
 static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3);
@@ -897,10 +899,11 @@ int check_param(parser_data_t* data, int position){
 
         if((sym = find_symbol_global(data->table_stack,data->token_ptr->attribute.string, !strcmp(data->id->id,data->token_ptr->attribute.string))) != NULL){
             bool param_nil_possibility = false;
-            if((sym->data.type != get_type_from_params(data->id_type,position, &param_nil_possibility,data->is_it_let_condition)
+            const item_type param_type = get_type_from_params(data->id_type,position, &param_nil_possibility,data->is_it_let_condition);
+            if((sym->data.type != param_type
                 || (data->is_it_let_condition ? false : sym->data.nil_possibility) != param_nil_possibility)
                 && data->id_type->type != IT_ANY){
-                return ER_PARAMS;
+                PRINT_ERROR_PARAMS_TYPE_MISMATCH(sym->data.type,param_type);
             }
             if(sym->data.defined) {
                 gen_function_pass_param_push(data->token_ptr, !sym->data.global);
@@ -926,11 +929,10 @@ int check_param(parser_data_t* data, int position){
             && param_type != IT_ANY) {
             if(type == IT_NIL && param_nil_possibility)
                 return ER_NONE;
-            return ER_PARAMS;
+            PRINT_ERROR_PARAMS_TYPE_MISMATCH(type,param_type);
         }
         return ER_NONE;
     }
-    return ER_PARAMS;
 }
 
 /**
