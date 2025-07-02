@@ -22,10 +22,13 @@ void print_json_message(char* message, const parser_data_t* data, const int ret_
 
 #define PRINT_SYNTAX_ERROR(message) {ret_code = ER_SYNTAX; print_json_message(message,data,ret_code); return ret_code;}
 
+#define PRINT_LEX_ERROR(){ret_code = ER_LEX; print_json_message("Lexical error",data,ret_code); return ret_code;}
+
 #define UNUSED(x) (void)(x)
 
 #define GET_TOKEN() \
-        if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag),&data->current_char_pos)) == NULL) {\
+        if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag),&data->current_char_pos,&data->token_start_pos)) == NULL) {\
+            PRINT_LEX_ERROR()\
             return ret_code;                                               \
         }           \
 
@@ -262,6 +265,10 @@ int analyse() {
     if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code, &flag,&parser_data->current_char_pos, &parser_data->token_start_pos)) != NULL)
     {
         ret_code = program(parser_data);
+    }
+    else {
+        parser_data_t* data = parser_data;
+        PRINT_LEX_ERROR();
     }
 
     generator_end();
