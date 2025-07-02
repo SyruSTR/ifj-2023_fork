@@ -38,7 +38,14 @@ void print_syntax_error_message(const parser_data_t* data,const char* message) {
         data->token_ptr->string == NULL || data->token_ptr->string->string == NULL ? "null" : data->token_ptr->string->string);
     char message_buff[100] = "Syntax error: ";
     strcat(message_buff,message);
-    print_error("{\n\t\"error_code\": %d,\n\t\"message\": \"%s\",\n\t\"line\": %d,\n\t\"char_pos\": %d,\n\t\"token_type\":%d,\n\t\"token_string\":\"%s\"\n}\n",
+    print_error("{"
+                "\n\t\"error_code\": %d,"
+                "\n\t\"message\": \"%s\","
+                "\n\t\"line\": %d,"
+                "\n\t\"char_pos\": %d,"
+                "\n\t\"token_type\":%d,"
+                "\n\t\"token_string\":\"%s\""
+                "\n}\n",
             code,
             message_buff,
             data->line_cnt,
@@ -54,7 +61,14 @@ void print_undef_func_or_redef_var_error(const parser_data_t* data) {
     strcat(
         token_content_buff,
         data->token_ptr->string == NULL || data->token_ptr->string->string == NULL ? "null" : data->token_ptr->string->string);
-    print_error("{\n\t\"error_code\": %d,\n\t\"line\": %d,\n\t\"char_pos\": %d,\n\t\"token_type\":%d,\n\t\"token_string\":\"%s\",\n\t\"is_function\":%b\n}\n",
+    print_error("{"
+                "\n\t\"error_code\": %d,"
+                "\n\t\"line\": %d,"
+                "\n\t\"char_pos\": %d,"
+                "\n\t\"token_type\":%d,"
+                "\n\t\"token_string\":\"%s\","
+                "\n\t\"is_function\":%b"
+                "\n}\n",
             code,
             data->line_cnt,
             data->token_start_pos,
