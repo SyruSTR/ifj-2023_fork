@@ -21,7 +21,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                            item_data *type_final);
 
 #define GET_TOKEN() \
-        if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag),&data->current_char_pos)) == NULL) {\
+        if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag),&data->current_char_pos,&data->token_start_pos)) == NULL) {\
             return ret_code;                                               \
         }           \
 
@@ -431,7 +431,7 @@ int expression(parser_data_t* data){
                 stack_print_all_symbols(&stack);
 #endif
 
-                data->token_ptr = next_token(&(data->line_cnt),&ret_code, &(data->eol_flag),&data->current_char_pos);
+                data->token_ptr = next_token(&(data->line_cnt),&ret_code, &(data->eol_flag),&data->current_char_pos,&data->token_start_pos);
                 if(ret_code != ER_NONE)
                 {
 #ifdef SEM_DEBUG
@@ -479,7 +479,7 @@ int expression(parser_data_t* data){
                 stack_print_all_symbols(&stack);
 #endif
 
-                data->token_ptr = next_token(&(data->line_cnt),&ret_code, &(data->eol_flag),&data->current_char_pos);
+                data->token_ptr = next_token(&(data->line_cnt),&ret_code, &(data->eol_flag),&data->current_char_pos,&data->token_start_pos);
                 if(ret_code != ER_NONE)
                 {
 #ifdef SEM_DEBUG

@@ -138,7 +138,6 @@ typedef struct token
     attribute_t attribute;
     unsigned int line;
     string_ptr string;
-    int token_start_pos;
 } *token_t_ptr;
 
 /**
@@ -148,4 +147,4 @@ typedef struct token
  * @param flag Pointer to a boolean flag indicating whether the scanner should continue.
  * @return A pointer to the obtained token.
  */
-token_t_ptr next_token(int *line_cnt, int* error, bool *flag, int* current_char_pos);
+token_t_ptr next_token(int *line_cnt, int* error, bool *flag, int* current_char_pos, int* token_start_pos);

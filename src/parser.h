@@ -20,6 +20,7 @@ typedef struct {
     int line_cnt;               // line counter
     int param_index;            // counter of parameters in a function
     int current_char_pos;
+    int token_start_pos;
 
     bool is_in_function;        // is in void or non-void function
     bool is_void_function;      // is in void function

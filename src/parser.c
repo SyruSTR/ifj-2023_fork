@@ -15,8 +15,9 @@
 
 void print_json_message(char* message, const parser_data_t* data, const int ret_code) {
     string_ptr tmp_str = string_init();
-    (data->token_ptr->string == NULL || data->token_ptr->string->string == NULL)  ? string_concat(tmp_str,"null") : string_concat(tmp_str,data->token_ptr->string->string);
-    fprintf(stderr,"{\n\t\"error_code\" : %d,\n\t\"message\" : \"%s\",\n\t\"line\" : %d,\n\t\"char_pos\" : %d,\n\t\"token_type\" : %d,\n\t\"token_string\" : \"%s\"\n}",ret_code,message,data->line_cnt,data->token_ptr->token_start_pos,data->token_ptr->token_type,tmp_str->string);
+    (data->token_ptr == NULL || data->token_ptr->string == NULL || data->token_ptr->string->string == NULL)  ? string_concat(tmp_str,"null") : string_concat(tmp_str,data->token_ptr->string->string);
+    enum token_type tmp_type = data->token_ptr == NULL ? T_ITS_NOT_A_TOKEN : data->token_ptr->token_type;
+    fprintf(stderr,"{\n\t\"error_code\" : %d,\n\t\"message\" : \"%s\",\n\t\"line\" : %d,\n\t\"char_pos\" : %d,\n\t\"token_type\" : %d,\n\t\"token_string\" : \"%s\"\n}",ret_code,message,data->line_cnt,data->token_start_pos,tmp_type,tmp_str->string);
 }
 
 #define PRINT_SYNTAX_ERROR(message) {ret_code = ER_SYNTAX; print_json_message(message,data,ret_code); return ret_code;}
@@ -62,6 +63,7 @@ parser_data_t *init_data()
         return NULL;
     }
     parser_data->current_char_pos = 0;
+    parser_data->token_start_pos = 0;
 
 
     t_table_stack *table_stack = table_stack_init();
@@ -257,7 +259,7 @@ int analyse() {
 
     generator_start();
 
-    if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code, &flag,&parser_data->current_char_pos)) != NULL)
+    if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code, &flag,&parser_data->current_char_pos, &parser_data->token_start_pos)) != NULL)
     {
         ret_code = program(parser_data);
     }
