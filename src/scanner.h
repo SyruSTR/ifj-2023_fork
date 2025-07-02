@@ -5,6 +5,9 @@
  * @brief lexical analysis
  */
 
+#ifndef SCANNER_H
+#define SCANNER_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -148,3 +151,5 @@ typedef struct token
  * @return A pointer to the obtained token.
  */
 token_t_ptr next_token(int *line_cnt, int* error, bool *flag, int* current_char_pos, int* token_start_pos);
+
+#endif // SCANNER_H

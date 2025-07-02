@@ -4,11 +4,11 @@ CC = gcc
 CFLAGS = -std=c11 -Werror -Wall -Wextra -pedantic
 CFLAGS += -g
 
-PROGS = src/scanner.c src/scanner.h src/error.h src/string.h src/string.c
+PROGS = src/scanner.c src/scanner.h src/error.h src/error.c src/string.h src/string.c
 PARSER_PROGS = src/hash.h src/hash.c src/parser.h src/parser.c src/table_stack.h src/table_stack.c src/stack.c src/stack.h src/semantics.c src/semantics.h src/generator.h src/generator.c
 SEMANTIC_PROGS = src/semantics.c src/semantics.h
 GENERATOR_PROGS = src/generator.c src/generator.h
-TESTS = ./tests/* src/scanner.c src/scanner.h src/error.h src/string.h src/string.c
+TESTS = ./tests/* src/scanner.c src/scanner.h src/error.h src/error.c src/string.h src/string.c
 SEM_TESTS = ./semantic_tests/*
 
 all: main

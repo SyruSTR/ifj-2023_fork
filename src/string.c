@@ -64,6 +64,8 @@ bool string_append(string_ptr string, char c)
 
 bool string_concat(string_ptr string, const char* src)
 {
+    if (src == NULL)
+        return false;
     int srclen = strlen(src);
     while (string->last_index + srclen > string->mem_allocated - 1)
     {

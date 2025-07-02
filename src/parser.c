@@ -13,22 +13,12 @@
 #include "semantics.h"
 #include "generator.h"
 
-void print_json_message(char* message, const parser_data_t* data, const int ret_code) {
-    string_ptr tmp_str = string_init();
-    (data->token_ptr == NULL || data->token_ptr->string == NULL || data->token_ptr->string->string == NULL)  ? string_concat(tmp_str,"null") : string_concat(tmp_str,data->token_ptr->string->string);
-    enum token_type tmp_type = data->token_ptr == NULL ? T_ITS_NOT_A_TOKEN : data->token_ptr->token_type;
-    fprintf(stderr,"{\n\t\"error_code\" : %d,\n\t\"message\" : \"%s\",\n\t\"line\" : %d,\n\t\"char_pos\" : %d,\n\t\"token_type\" : %d,\n\t\"token_string\" : \"%s\"\n}",ret_code,message,data->line_cnt,data->token_start_pos,tmp_type,tmp_str->string);
-}
-
-#define PRINT_SYNTAX_ERROR(message) {ret_code = ER_SYNTAX; print_json_message(message,data,ret_code); return ret_code;}
-
-#define PRINT_LEX_ERROR(){ret_code = ER_LEX; print_json_message("Lexical error",data,ret_code); return ret_code;}
+#define PRINT_SYNTAX_ERROR(message) {print_syntax_error_message(data,message); return ER_SYNTAX;}
 
 #define UNUSED(x) (void)(x)
 
 #define GET_TOKEN() \
         if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag),&data->current_char_pos,&data->token_start_pos)) == NULL) {\
-            PRINT_LEX_ERROR()\
             return ret_code;                                               \
         }           \
 
@@ -39,11 +29,9 @@ void print_json_message(char* message, const parser_data_t* data, const int ret_
 
 char tmp_str[100];
 
-#define VERIFY_TOKEN(t_token, message)  \
+#define VERIFY_TOKEN(t_token)  \
     GET_TOKEN()                \
-    memset(tmp_str,'\0',100);\
-    strcat(tmp_str,"syntax Error: "); strcat(tmp_str,message); \
-    if (data->token_ptr->token_type != t_token) PRINT_SYNTAX_ERROR(tmp_str);\
+    if (data->token_ptr->token_type != t_token) {print_syntax_error(data, t_token); return ER_SYNTAX;}\
                                \
 
 #define INSERT_SYM() \
@@ -249,13 +237,13 @@ int analyse() {
 
     string_ptr string;
     if ((string = string_init()) == NULL)
-        PRINT_MESSAGE_AND_EXIT_SHORT("Internal error code",ER_INTERNAL)
+        return ER_INTERNAL;
 
     parser_data_t *parser_data;
     if ((parser_data = init_data()) == NULL)
     {
         string_free(string);
-        PRINT_MESSAGE_AND_EXIT_SHORT("Internal error code",ER_INTERNAL)
+        return ER_INTERNAL;
     }
 
     parser_data->line_cnt = 1;
@@ -267,8 +255,7 @@ int analyse() {
         ret_code = program(parser_data);
     }
     else {
-        parser_data_t* data = parser_data;
-        PRINT_LEX_ERROR();
+        print_lexical_error(parser_data->line_cnt,parser_data->token_start_pos,"Lex Error");
     }
 
     generator_end();
@@ -299,7 +286,7 @@ int stm(parser_data_t *data) {
     // <stm> -> var + let id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && ( data->token_ptr->attribute.keyword == k_var || (is_let = data->token_ptr->attribute.keyword == k_let))) {
         data->is_in_declaration = true;
-        VERIFY_TOKEN(T_ID,"Cant was verified ID")
+        VERIFY_TOKEN(T_ID)
         INSERT_SYM()
         if(table_count_elements_in_stack(data->table_stack) == 1)
             data->id->global = true;
@@ -330,9 +317,8 @@ int stm(parser_data_t *data) {
                 return stm(data);
             }
             else {
-                ret_code = ER_SYNTAX;
-                print_json_message("Wainting Assigment or EOL",data,ret_code);
-                return ret_code;
+                print_syntax_error_message(data,"Wainting Assigment or EOL");
+                return ER_SYNTAX;
             }
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
@@ -342,7 +328,7 @@ int stm(parser_data_t *data) {
             data->is_in_declaration = false;
             if(data->eol_flag)
                 return stm(data);
-            VERIFY_TOKEN(T_EOF,"Cant was verified EOF")
+            VERIFY_TOKEN(T_EOF)
             return ER_NONE;
         }
         else PRINT_SYNTAX_ERROR("Waiting Colon or Assigment")
@@ -406,7 +392,7 @@ int stm(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
         if(data->func_id != NULL)
             return ER_OTHER_SEM;
-        VERIFY_TOKEN(T_ID,"Cant was verified ID")
+        VERIFY_TOKEN(T_ID)
         data->is_in_declaration = true;
 
         symbol *idFromTable = NULL;
@@ -418,7 +404,7 @@ int stm(parser_data_t *data) {
 
         INSERT_SYM()
         data->func_id = data->id;
-        VERIFY_TOKEN(T_BRACKET_OPEN,"Cant was verified '('")
+        VERIFY_TOKEN(T_BRACKET_OPEN)
         data->is_in_params = true;
         data->param_index = 0;
         data->id->is_function = true;
@@ -444,7 +430,7 @@ int stm(parser_data_t *data) {
             CHECK_RULE(var_type)
             data->is_in_function = false;
 
-            VERIFY_TOKEN(T_CURVED_BRACKET_OPEN,"Cant was verified '}'")
+            VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
             GET_TOKEN()
             CHECK_RULE(stm)
@@ -501,7 +487,7 @@ int stm(parser_data_t *data) {
         local_table = create_hash_table();
         table_stack_push(data->table_stack,local_table);
 
-        VERIFY_TOKEN(T_CURVED_BRACKET_OPEN,"Cant was verified '{'")
+        VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
         GET_TOKEN()
         CHECK_RULE(stm)
@@ -607,7 +593,7 @@ int condition(parser_data_t *data) {
     int ret_code = ER_NONE;
 
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
-        VERIFY_TOKEN(T_ID,"Cant was verified ID")
+        VERIFY_TOKEN(T_ID)
         if(table_count_elements_in_stack(data->table_stack) == 0)
             return ER_INTERNAL;
         if (!find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string)) {
@@ -623,7 +609,7 @@ int condition(parser_data_t *data) {
     CHECK_RULE(expression)
 
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
-        VERIFY_TOKEN(T_ID,"Cant was verified ID")
+        VERIFY_TOKEN(T_ID)
     }
 
     return ret_code;
@@ -684,7 +670,7 @@ int func_params(parser_data_t *data) {
         } else
             PRINT_SYNTAX_ERROR("waiting ID or Underline")
 
-        VERIFY_TOKEN(T_COLON,"Cant was verified ':'")
+        VERIFY_TOKEN(T_COLON)
 
         GET_TOKEN()
         CHECK_RULE(var_type)
@@ -731,14 +717,12 @@ int func_params_not_null(parser_data_t *data) {
 
 // <nil_flag> -> ! + ε
 int nil_flag(parser_data_t *data) {
-    int ret_code = ER_NONE;
     if (data->token_ptr->token_type == T_EXCLAMATION_MARK) {
         return ER_NONE;
     }
-    else if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) {     // bug?
+    else if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) {     // TODO bug?
         return ER_NONE;
     }
-    ret_code = ER_SYNTAX;
     PRINT_SYNTAX_ERROR("Waiting ! or ")
 }
 
@@ -884,13 +868,11 @@ int insert_data_type(parser_data_t *data){
 }
 
 int var_type(parser_data_t* data) {
-    int ret_code = ER_NONE;
     if (data->token_ptr->token_type == T_KEYWORD || data->token_ptr->token_type == T_KEYWORD_NIL_POSSIBILITY)
     {
         insert_data_type(data);
     }
     else {
-        ret_code = ER_SYNTAX;
         PRINT_SYNTAX_ERROR("Waiting keyword or variable doesnt have nil_flag")
     }
     return ER_NONE;

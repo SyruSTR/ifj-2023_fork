@@ -7,10 +7,10 @@
 #ifndef ERROR_HEADER_G
 #define ERROR_HEADER_G
 
-#define PRINT_MESSAGE_AND_EXIT_FULL(message, error_code, line, char, token_type, token_string) {fprintf(stderr, "{\n\t\"error_code\" : %d,\n\t\"message\" : \"%s\",\n\t\"line\" : %d,\n\t\"char_pos\" : %d,\n\t\"token_type\" : %d,\n\t\"token_string\" : \"%s\"\n}",error_code,message,line,char,token_type,token_string ); \
-    return error_code;}
+#include <stdarg.h>
+#include <stdio.h>
+#include "parser.h"
 
-#define PRINT_MESSAGE_AND_EXIT_SHORT(message,error_code) PRINT_MESSAGE_AND_EXIT_FULL(message,error_code,-1,-1,0,"")
 
 /**
  * @brief enum for readable code errors
@@ -28,5 +28,13 @@ typedef enum error{
     ER_OTHER_SEM       = 9,
     ER_INTERNAL      = 99
 } error_t;
+
+void print_error(const char* format, ...);
+
+void print_lexical_error(const int line, const int char_pos, const char* message);
+
+void print_syntax_error(const parser_data_t* data,const enum token_type verified_token);
+
+void print_syntax_error_message(const parser_data_t* data,const char* message);
 
 #endif
