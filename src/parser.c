@@ -395,7 +395,7 @@ int stm(parser_data_t *data) {
     // <stm> -> func func_id( <func_params> ) { <stm> <return_void> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
         if(data->func_id != NULL)
-            return ER_OTHER_SEM;
+            PRINT_UNRESOLVED(ER_OTHER_SEM)
         VERIFY_TOKEN(T_ID)
         data->is_in_declaration = true;
 
@@ -403,7 +403,7 @@ int stm(parser_data_t *data) {
 
         if((idFromTable = find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string)) != NULL){
             if(idFromTable->data.is_function)
-                return ER_OTHER_SEM;
+                PRINT_UNRESOLVED(ER_OTHER_SEM)
         }
 
         INSERT_SYM()
@@ -582,7 +582,7 @@ int call_params_n(parser_data_t *data) {
     else if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
         if(data->param_index+1 != data->id_type->params->last_index && !its_write) {
             print_params_error_args_mismatch(data, data->param_index+1, data->id_type->params->last_index);
-            return ER_PARAMS;
+            PRINT_UNRESOLVED(ER_PARAMS)
         }
         return ER_NONE;
     }
@@ -646,7 +646,7 @@ int func_params(parser_data_t *data) {
 
 
             if(!strcmp(data->id->id_names[data->param_index],data->token_ptr->attribute.string)){
-                return ER_OTHER_SEM;
+                PRINT_UNRESOLVED(ER_OTHER_SEM)
             }
             // if there is function named as parameter
             if(table_count_elements_in_stack(data->table_stack) != 2)

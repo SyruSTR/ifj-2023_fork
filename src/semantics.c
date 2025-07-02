@@ -47,7 +47,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 // strange rule
 #define NIL_POSSIBILITY_CHECK() \
                 if(operand_1->item.nil_possibility != operand_3->item.nil_possibility) \
-                    return ER_TYPE_COMP;                                               \
+                    PRINT_UNRESOLVED(ER_TYPE_COMP)                                               \
                 type_final->nil_possibility = operand_1->item.nil_possibility\
 
 
@@ -318,7 +318,7 @@ int reduce(parser_data_t* data){
         rule = check_rule(count_symbols_before_stop,op1,op2,op3);
     }
     else
-        return ER_SYNTAX;
+        PRINT_UNRESOLVED(ER_SYNTAX)
 
     if(rule == NOT_A_RULE){
 #ifdef SEM_DEBUG
@@ -328,7 +328,7 @@ int reduce(parser_data_t* data){
         fprintf(stderr, "Not a rule\n");
 #endif
 
-        return ER_SYNTAX;
+        PRINT_UNRESOLVED(ER_SYNTAX)
     }
     else{
         //todo check semantics
@@ -370,7 +370,7 @@ int expression(parser_data_t* data){
 #endif
 
     if((data->id->is_let && data->id->defined))
-        return ER_OTHER_SEM;
+        PRINT_UNRESOLVED(ER_OTHER_SEM)
 
     stack_init(&stack);
     //init item_data
@@ -401,7 +401,7 @@ int expression(parser_data_t* data){
                 GET_TOKEN()
             }
             else
-                return ER_SYNTAX;
+                PRINT_UNRESOLVED(ER_SYNTAX)
         }
         actual_symbol = convert_token_into_symbol(data,last_action_is_reduce);
         if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let && !data->eol_flag)
@@ -529,6 +529,7 @@ int expression(parser_data_t* data){
 #ifdef FOR_LSP
                     fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
+                    // todo correct error code?
                     FREE(ER_SYNTAX);
                 }
                 last_action_is_reduce = false;
@@ -690,7 +691,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
     // strange rule
     if (rule != OPERAND && rule != LBR_NT_RBR && rule != NT_AS_NT){
         if (operand_1->item.type == IT_UNDEF || ( operand_3 != NULL && operand_3->item.type == IT_UNDEF)){
-            return ER_UNDEF_VAR_OR_NOTINIT_VAR;
+            PRINT_UNRESOLVED(ER_UNDEF_VAR_OR_NOTINIT_VAR)
         }
     }
 
@@ -746,7 +747,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                    (operand_3->item.type == IT_INT && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined))
                     ; //todo translate Int2Double
                 else
-                    return ER_TYPE_COMP;
+                    PRINT_UNRESOLVED(ER_TYPE_COMP)
             }
 
             type_final->type = IT_DOUBLE;
@@ -808,7 +809,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                    (operand_3->item.type == IT_INT && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined))
                     ; //todo translate Int2Double
                 else
-                    return ER_TYPE_COMP;
+                    PRINT_UNRESOLVED(ER_TYPE_COMP)
             }
 
             type_final->type = IT_BOOL;
@@ -825,7 +826,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                    (operand_3->item.type == IT_INT && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined))
                     ; //todo translate Int2Double
                 else
-                    return ER_TYPE_COMP;
+                    PRINT_UNRESOLVED(ER_TYPE_COMP)
             }
 
             if(operand_1->item.nil_possibility || operand_3->item.nil_possibility)
@@ -851,8 +852,8 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                     ; // TODO Generate int2Double
                 else{
                     if(operand_1->item.is_function)
-                        return ER_PARAMS;
-                    return ER_TYPE_COMP;
+                        PRINT_UNRESOLVED(ER_PARAMS)
+                    PRINT_UNRESOLVED(ER_TYPE_COMP)
                 }
 
             }
@@ -860,9 +861,9 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 !operand_1->item.nil_possibility &&
                     operand_3->item.nil_possibility){
                 if(operand_1->item.is_function)
-                    return ER_PARAMS;
+                    PRINT_UNRESOLVED(ER_PARAMS)
                 //three variants
-                return ER_TYPE_COMP;
+                PRINT_UNRESOLVED(ER_TYPE_COMP)
             }
 
             if(operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL)
@@ -877,7 +878,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
         default:
             //todo change error;
-            return ER_INFERENCE;
+            PRINT_UNRESOLVED(ER_INFERENCE)
 
     }
 
@@ -925,7 +926,7 @@ int check_param(parser_data_t* data, int position){
             string_ptr var_name = data->token_ptr->string;
             GET_TOKEN()
             if(data->token_ptr->token_type == T_COLON)
-                return ER_OTHER_SEM;
+                PRINT_UNRESOLVED(ER_OTHER_SEM)
             PRINT_UNDEF_OR_NOT_INIT_VAR(var_name->string);
         }
 
@@ -956,7 +957,7 @@ int check_func_call(parser_data_t *data, int position){
     bool its_write = !strcmp(data->id_type->id,"write");
     GET_TOKEN()
     if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id_type->params->string == NULL)
-        return ER_PARAMS; // ?
+        PRINT_UNRESOLVED(ER_PARAMS) // ?
     else if(data->token_ptr->token_type == T_BRACKET_CLOSE && data->param_index != data->id_type->params->last_index)
         PRINT_ERROR_PARAMS_ARGS_MISMATCH(data->param_index,data->id_type->params->last_index)
     else if(data->token_ptr->token_type == T_ID){
@@ -971,7 +972,7 @@ int check_func_call(parser_data_t *data, int position){
         else if ((data->id_type->id_names && !strcmp(data->id_type->id_names[position],"_")) || its_write){
             return check_param(data,position);
         } else
-            return ER_PARAMS; // ?
+            PRINT_UNRESOLVED(ER_PARAMS) // ?
     }
     else if(data->token_ptr->token_type == T_INT
             || data->token_ptr->token_type == T_DECIMAL
@@ -980,16 +981,17 @@ int check_func_call(parser_data_t *data, int position){
         if(position+1 > data->id_type->params->last_index && !its_write)
             PRINT_ERROR_PARAMS_ARGS_MISMATCH(position+1,data->id_type->params->last_index)
         else if(data->id_type->id_names && strcmp(data->id_type->id_names[position],"_"))
-            return ER_OTHER_SEM;
+            PRINT_UNRESOLVED(ER_OTHER_SEM)
         return check_param(data,position);
     }
     else if(data->token_ptr->token_type == T_BRACKET_CLOSE && (data->id_type->params == NULL || data->id_type->params->last_index == 0))
         return ER_NONE;
     else if(data->param_index+1 != data->id_type->params->last_index)
-        return ER_SYNTAX;
+        // ER_PARAMS?
+        PRINT_UNRESOLVED(ER_SYNTAX)
     GET_TOKEN();
     if(data->token_ptr->token_type == T_EOF)
-        return ER_SYNTAX;
-    return ER_PARAMS; // unfinished function call
+        PRINT_SYNTAX_ERROR("Waiting expression")
+    PRINT_UNRESOLVED(ER_PARAMS) // unfinished function call
 }
 

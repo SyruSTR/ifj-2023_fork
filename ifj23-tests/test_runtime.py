@@ -114,6 +114,11 @@ def test(input_code: str, expected_output: str, program_stdin: str = "",
         nr_failed += 1
         print("--------------------------")
         return
+    # find unresolved errors
+    else:
+        if not compiler_stderr:
+            print_red_bold("compiler stdin:")
+            print(input_code)
 
     if compiler_return_code != ErrorType.success:
         return

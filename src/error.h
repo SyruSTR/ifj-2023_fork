@@ -21,6 +21,9 @@
 
 #define PRINT_INFERENCE() {print_inference_error(data); return ER_INFERENCE;}
 
+#define PRINT_UNRESOLVED(code) {print_unresolved_error(data,code); return code;}
+
+
 /**
  * @brief enum for readable code errors
  */
@@ -63,5 +66,7 @@ void print_type_comp_error(const parser_data_t* data,item_type actual_type,item_
 void print_type_comp_nil_error(const parser_data_t* data);
 
 void print_inference_error(const parser_data_t* data);
+
+void print_unresolved_error(const parser_data_t* data, int code);
 
 #endif
