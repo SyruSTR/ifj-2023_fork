@@ -64,7 +64,7 @@ void print_undef_func_or_redef_var_error(const parser_data_t* data) {
 }
 
 void print_params_error_type_mismatch(const parser_data_t* data, const item_type actual_type, const item_type expected_type) {
-    const error_t code = ER_PARAMS;
+    const error_t code = ER_PARAMS_TYPE_MISMATCH;
     // print_error("{\n\t\"error_code\": %d,"
     //             "\n\t\"line\": %d,"
     //             "\n\t\"char_pos\": %d,"
@@ -98,7 +98,7 @@ void print_params_error_type_mismatch(const parser_data_t* data, const item_type
 }
 
 void print_params_error_args_mismatch(const parser_data_t* data,int actual_args, const int expected_args) {
-    const error_t code = ER_PARAMS;
+    const error_t code = ER_PARAMS_ARGS_MISMATCH;
     print_error("{\n\t\"error_code\": %d,"
         "\n\t\"line\": %d,"
         "\n\t\"char_pos\": %d,"

@@ -26,6 +26,8 @@ typedef enum error{
     ER_TYPE_COMP     = 7,
     ER_INFERENCE     = 8,
     ER_OTHER_SEM       = 9,
+    ER_PARAMS_ARGS_MISMATCH = 40, // for LSP
+    ER_PARAMS_TYPE_MISMATCH = 41, // for LSP
     ER_INTERNAL      = 99
 } error_t;
 
