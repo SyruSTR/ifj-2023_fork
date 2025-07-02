@@ -1008,6 +1008,11 @@ def test_all():
     test_expr("nil ?? \"abc\" ", "abc")
 
     test("""
+        let result = nil ?? nil
+        write(result)
+    ""","", expected_return_code=error_type)
+
+    test("""
     let a: Int? = 5
     let b = a ?? nil
     """, "", expected_return_code=error_type)
