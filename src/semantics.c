@@ -44,6 +44,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
 #define UNUSED(x) (void)(x)
 
+// strange rule
 #define NIL_POSSIBILITY_CHECK() \
                 if(operand_1->item.nil_possibility != operand_3->item.nil_possibility) \
                     return ER_TYPE_COMP;                                               \
@@ -716,7 +717,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 //                return ER_INFERENCE;
 
             if(operand_1->item.nil_possibility || operand_3->item.nil_possibility)
-                return ER_TYPE_COMP;
+                PRINT_TYPE_COMP_NIL();
             // concatenation
             if (operand_1->item.type == IT_STRING && operand_3->item.type == IT_STRING && rule == NT_PLUS_NT){
                 type_final->type = IT_STRING;
@@ -736,9 +737,10 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 type_final->defined = true;
                 break;
             }
-            else if (operand_1->item.type == IT_STRING || operand_3->item.type == IT_STRING){
-                return ER_TYPE_COMP;
+            else if (operand_1->item.type == IT_STRING ||operand_3->item.type == IT_STRING){
+                PRINT_TYPE_COMP(IT_STRING,IT_INT);
             }
+            // strange rule
             else if(operand_1->item.type != operand_3->item.type){
                 if((operand_1->item.type == IT_INT && operand_3->item.type == IT_DOUBLE && !operand_1->item.defined) ||
                    (operand_3->item.type == IT_INT && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined))
@@ -774,14 +776,15 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                     type_final->type = operand_3->item.type;
                 }
                 else
-                    return ER_TYPE_COMP;
+                    // both are nil
+                    PRINT_TYPE_COMP_NIL()
             }
 
             if(type_final->type == IT_UNDEF){
                 if(!operand_3->item.nil_possibility){
                     type_final->type = operand_1->item.type;
                 } else
-                    return ER_TYPE_COMP;
+                    PRINT_TYPE_COMP(IT_NIL,IT_NOT_NIL);
             }
 
             break;
@@ -792,7 +795,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 PRINT_UNDEF_OR_NOT_INIT_VAR(operand_1->item.id);
             }
             if(operand_1->item.type == IT_NIL)
-                return ER_TYPE_COMP;
+                PRINT_TYPE_COMP(IT_NIL, IT_NOT_NIL);
             //NIL_POSSIBILITY_CHECK();
             type_final->nil_possibility = false;
             type_final->defined = true;
@@ -826,10 +829,11 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             }
 
             if(operand_1->item.nil_possibility || operand_3->item.nil_possibility)
-                return ER_TYPE_COMP;
+                PRINT_TYPE_COMP(IT_NIL,IT_NOT_NIL);
 
+            // todo maybe delete it
             if ((operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL)) {
-                return ER_TYPE_COMP;
+                PRINT_TYPE_COMP(IT_NIL,IT_NOT_NIL);
             }
 
 
@@ -840,7 +844,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_AS_NT:
 
             if(operand_3->item.type == IT_UNDEF)
-                return ER_TYPE_COMP;
+                PRINT_TYPE_COMP(IT_UNDEF, IT_ANY);
 
             if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF && operand_3->item.type != IT_NIL){
                 if(operand_1->item.type == IT_DOUBLE && operand_3->item.type == IT_INT && !operand_3->item.defined)
@@ -857,6 +861,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                     operand_3->item.nil_possibility){
                 if(operand_1->item.is_function)
                     return ER_PARAMS;
+                //three variants
                 return ER_TYPE_COMP;
             }
 
@@ -951,7 +956,7 @@ int check_func_call(parser_data_t *data, int position){
     bool its_write = !strcmp(data->id_type->id,"write");
     GET_TOKEN()
     if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id_type->params->string == NULL)
-        return ER_PARAMS;
+        return ER_PARAMS; // ?
     else if(data->token_ptr->token_type == T_BRACKET_CLOSE && data->param_index != data->id_type->params->last_index)
         PRINT_ERROR_PARAMS_ARGS_MISMATCH(data->param_index,data->id_type->params->last_index)
     else if(data->token_ptr->token_type == T_ID){
@@ -966,7 +971,7 @@ int check_func_call(parser_data_t *data, int position){
         else if ((data->id_type->id_names && !strcmp(data->id_type->id_names[position],"_")) || its_write){
             return check_param(data,position);
         } else
-            return ER_PARAMS;
+            return ER_PARAMS; // ?
     }
     else if(data->token_ptr->token_type == T_INT
             || data->token_ptr->token_type == T_DECIMAL
@@ -985,6 +990,6 @@ int check_func_call(parser_data_t *data, int position){
     GET_TOKEN();
     if(data->token_ptr->token_type == T_EOF)
         return ER_SYNTAX;
-    return ER_PARAMS;
+    return ER_PARAMS; // unfinished function call
 }
 

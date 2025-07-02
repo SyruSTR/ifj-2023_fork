@@ -15,6 +15,10 @@
 
 #define PRINT_FUNC_RETURN(func_name) {print_func_return_error(func_name); return ER_FUNC_RETURN;}
 
+#define PRINT_TYPE_COMP(actual,expected) {print_type_comp_error(data,actual,expected); return ER_TYPE_COMP;}
+
+#define PRINT_TYPE_COMP_NIL() {print_type_comp_nil_error(data); return ER_TYPE_COMP;}
+
 /**
  * @brief enum for readable code errors
  */
@@ -51,5 +55,9 @@ void print_params_error_args_mismatch(const parser_data_t* data,int actual_args,
 void print_undef_or_not_init_variable_error(const parser_data_t* data, char* var_name);
 
 void print_func_return_error(const char* function_name);
+
+void print_type_comp_error(const parser_data_t* data,item_type actual_type,item_type expected_type);
+
+void print_type_comp_nil_error(const parser_data_t* data);
 
 #endif

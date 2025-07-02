@@ -138,3 +138,35 @@ void print_func_return_error(const char* function_name) {
     function_name
     );
 }
+
+void print_type_comp_error(const parser_data_t* data,const item_type actual_type,const item_type expected_type) {
+    const error_t code = ER_TYPE_COMP;
+    print_error("{\n\t\"error_code\": %d,"
+        "\n\t\"line\": %d,"
+        "\n\t\"char_pos\": %d,"
+        "\n\t\"expected_type\":%d,"
+        "\n\t\"actual_type\":%d"
+        "\n}\n",
+    code,
+    data->line_cnt,
+    data->token_start_pos,
+    expected_type,
+    actual_type
+    );
+}
+
+void print_type_comp_nil_error(const parser_data_t* data) {
+    const error_t code = ER_TYPE_COMP;
+    print_error("{\n\t\"error_code\": %d,"
+        "\n\t\"line\": %d,"
+        "\n\t\"char_pos\": %d,"
+        "\n\t\"expected_type\":%d,"
+        "\n\t\"actual_type\":%d"
+        "\n}\n",
+    code,
+    data->line_cnt,
+    data->token_start_pos,
+    IT_NOT_NIL,
+    IT_NIL
+    );
+}

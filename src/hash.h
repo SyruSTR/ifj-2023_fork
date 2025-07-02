@@ -23,7 +23,8 @@ typedef enum {
     IT_ANY,
     IT_NIL,
     IT_UNDEF,
-    IT_BOOL
+    IT_BOOL,
+    IT_NOT_NIL // for LSP
 } item_type;
 
 /**
