@@ -37,4 +37,6 @@ void print_syntax_error(const parser_data_t* data,const enum token_type verified
 
 void print_syntax_error_message(const parser_data_t* data,const char* message);
 
+void print_undef_func_or_redef_var_error(const parser_data_t* data);
+
 #endif

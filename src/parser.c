@@ -15,6 +15,8 @@
 
 #define PRINT_SYNTAX_ERROR(message) {print_syntax_error_message(data,message); return ER_SYNTAX;}
 
+#define PRINT_UNDEF_FUNC_OR_NOT_INIT_VARIABLE() {print_undef_func_or_redef_var_error(data); return ER_UNDEF_FUNC_OR_REDEF_VAR;}
+
 #define UNUSED(x) (void)(x)
 
 #define GET_TOKEN() \
@@ -41,7 +43,7 @@ char tmp_str[100];
         data->id = insert_symbol(data->table_stack->top->table,data->token_ptr->attribute.string,&internal_error);\
         if(!data->id){\
             if(internal_error) return ER_INTERNAL;\
-        else return ER_UNDEF_FUNC_OR_REDEF_VAR;\
+        else PRINT_UNDEF_FUNC_OR_NOT_INIT_VARIABLE()\
 }                       \
 
 
@@ -352,8 +354,9 @@ int stm(parser_data_t *data) {
                 return ER_UNDEF_VAR_OR_NOTINIT_VAR;
             data->id = &(idFromTable->data);
 
-            if(!data->id->is_function)
-                return ER_UNDEF_FUNC_OR_REDEF_VAR;
+            if(!data->id->is_function) {
+                PRINT_UNDEF_FUNC_OR_NOT_INIT_VARIABLE()
+            }
 
             data->id_type = data->id;
             data->param_index = 0;
