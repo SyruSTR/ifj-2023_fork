@@ -128,3 +128,13 @@ void print_undef_or_not_init_variable_error(const parser_data_t* data, char* var
     var_name
     );
 }
+
+void print_func_return_error(const char* function_name) {
+    const int code = ER_FUNC_RETURN;
+    print_error("{\n\t\"error_code\": %d,"
+        "\n\t\"function_name\": \"%s\""
+        "\n}\n",
+    code,
+    function_name
+    );
+}

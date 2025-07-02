@@ -13,6 +13,8 @@
 
 #define PRINT_UNDEF_OR_NOT_INIT_VAR(var_name) {print_undef_or_not_init_variable_error(data,var_name); return ER_UNDEF_VAR_OR_NOTINIT_VAR;}
 
+#define PRINT_FUNC_RETURN(func_name) {print_func_return_error(func_name); return ER_FUNC_RETURN;}
+
 /**
  * @brief enum for readable code errors
  */
@@ -47,5 +49,7 @@ void print_params_error_type_mismatch(const parser_data_t* data,item_type actual
 void print_params_error_args_mismatch(const parser_data_t* data,int actual_args, int expected_args);
 
 void print_undef_or_not_init_variable_error(const parser_data_t* data, char* var_name);
+
+void print_func_return_error(const char* function_name);
 
 #endif

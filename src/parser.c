@@ -743,7 +743,7 @@ int return_rule(parser_data_t *data) {
         PRINT_SYNTAX_ERROR("Waiting return is placed other of body")
     data->id = data->func_id;
 
-    if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) return ER_FUNC_RETURN;
+    if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) PRINT_FUNC_RETURN(data->id->id);
     CHECK_RULE(expression)
 
     return ret_code;
