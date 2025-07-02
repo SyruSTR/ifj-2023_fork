@@ -23,6 +23,9 @@
 
 #define PRINT_UNRESOLVED(code) {print_unresolved_error(data,code); return code;}
 
+#define PRINT_SYNTAX_ERROR(message) {print_syntax_error_message(data,message); return ER_SYNTAX;}
+
+#define PRINT_UNDEF_FUNC_OR_NOT_INIT_VARIABLE() {print_undef_func_or_redef_var_error(data); return ER_UNDEF_FUNC_OR_REDEF_VAR;}
 
 /**
  * @brief enum for readable code errors

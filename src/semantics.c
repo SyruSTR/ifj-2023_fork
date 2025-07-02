@@ -32,7 +32,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
 #define VERIFY_TOKEN(t_token)  \
     GET_TOKEN()                \
-    if (data->token_ptr->token_type != t_token) return ER_SYNTAX;\
+    if (data->token_ptr->token_type != t_token) {print_syntax_error(data, t_token); return ER_SYNTAX;}\
 
 #define FREE(_error_code) \
     do{                   \
@@ -396,7 +396,7 @@ int expression(parser_data_t* data){
 
                 if ((ret_code = call_params(data))) return ret_code;
 
-                if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
+                if (data->token_ptr->token_type != T_BRACKET_CLOSE) PRINT_SYNTAX_ERROR("Waiting ')'")
 
                 GET_TOKEN()
             }

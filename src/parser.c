@@ -13,9 +13,6 @@
 #include "semantics.h"
 #include "generator.h"
 
-#define PRINT_SYNTAX_ERROR(message) {print_syntax_error_message(data,message); return ER_SYNTAX;}
-
-#define PRINT_UNDEF_FUNC_OR_NOT_INIT_VARIABLE() {print_undef_func_or_redef_var_error(data); return ER_UNDEF_FUNC_OR_REDEF_VAR;}
 
 
 #define UNUSED(x) (void)(x)
@@ -320,8 +317,7 @@ int stm(parser_data_t *data) {
                 return stm(data);
             }
             else {
-                print_syntax_error_message(data,"Wainting Assigment or EOL");
-                return ER_SYNTAX;
+                PRINT_SYNTAX_ERROR("Waiting Assigment or EOL")
             }
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
