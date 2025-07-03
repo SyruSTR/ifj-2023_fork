@@ -34,11 +34,13 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
     GET_TOKEN()                \
     if (data->token_ptr->token_type != t_token) {print_syntax_error(data, t_token); return ER_SYNTAX;}\
 
+#define ERROR_WITH_FREE(_error_code,function_call){ function_call ;FREE(_error_code);}
+
 #define FREE(_error_code) \
     do{                   \
         stack_free(&stack); \
         \
-        PRINT_UNRESOLVED(_error_code)   \
+        return _error_code;   \
         }\
     while(0) \
 
@@ -414,7 +416,8 @@ int expression(parser_data_t* data){
 #ifdef FOR_LSP
             fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
-            FREE(ER_INTERNAL);
+            ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL())
+            // FREE(ER_INTERNAL);
         }
 
         switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
@@ -431,7 +434,8 @@ int expression(parser_data_t* data){
 #ifdef FOR_LSP
                     fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
-                    FREE(ER_INTERNAL);
+                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL())
+                    // FREE(ER_INTERNAL);
                 }
 
 #ifdef SEM_DEBUG
@@ -447,7 +451,8 @@ int expression(parser_data_t* data){
 #ifdef FOR_LSP
                     fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
-                    FREE(ER_INTERNAL);
+                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL())
+                    // FREE(ER_INTERNAL);
                 }
 
                 last_action_is_reduce = false;
@@ -461,7 +466,8 @@ int expression(parser_data_t* data){
 #ifdef FOR_LSP
                     fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
-                    FREE(ER_INTERNAL);
+                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL())
+                    // FREE(ER_INTERNAL);
                 }
                 tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
@@ -474,7 +480,8 @@ int expression(parser_data_t* data){
 #ifdef FOR_LSP
                     fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
-                    FREE(ER_INTERNAL);
+                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL())
+                    // FREE(ER_INTERNAL);
                 }
 
                 if (actual_symbol == IDENTIFIER) {
@@ -531,7 +538,8 @@ int expression(parser_data_t* data){
                     fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
                     // todo correct error code?
-                    FREE(ER_SYNTAX);
+                    ERROR_WITH_FREE(ER_SYNTAX, PRINT_SYNTAX_ERROR("Syntax error in semantic analise"))
+                    // FREE(ER_SYNTAX);
                 }
                 last_action_is_reduce = false;
                 break;
