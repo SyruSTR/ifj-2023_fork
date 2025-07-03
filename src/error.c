@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#define  BOOL_WRAP(boolean) ((boolean) ? "true" : "false")
+
 void print_error(const char* format, ...) {
     va_list args;
     va_start(args, format);
@@ -135,13 +137,13 @@ void print_undef_or_not_init_variable_error(const parser_data_t* data, char* var
         "\n\t\"line\": %d,"
         "\n\t\"char_pos\": %d,"
         "\n\t\"variable_name\": \"%s\","
-        "\n\t\"is_it_assigment\": %d,"
+        "\n\t\"is_it_assigment\": %s"
         "\n}\n",
     code,
     data->line_cnt,
     data->token_start_pos,
     var_name,
-    is_it_assigment
+    BOOL_WRAP(is_it_assigment)
     );
 }
 
