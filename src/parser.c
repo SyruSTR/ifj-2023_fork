@@ -350,7 +350,7 @@ int stm(parser_data_t *data) {
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
 
             if((idFromTable = find_symbol_global(data->table_stack, var_name,false)) == NULL)
-                PRINT_UNDEF_OR_NOT_INIT_VAR(var_name)
+                PRINT_UNDEF_OR_NOT_INIT_VAR(var_name,data->is_in_declaration)
             data->id = &(idFromTable->data);
 
             if(!data->id->is_function) {
@@ -376,7 +376,7 @@ int stm(parser_data_t *data) {
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             if((idFromTable = find_symbol_global(data->table_stack, var_name,false)) == NULL)
-                PRINT_UNDEF_OR_NOT_INIT_VAR(var_name)
+                PRINT_UNDEF_OR_NOT_INIT_VAR(var_name,data->is_in_declaration)
             data->id = &(idFromTable->data);
 
             GET_TOKEN()
@@ -602,7 +602,7 @@ int condition(parser_data_t *data) {
         if(table_count_elements_in_stack(data->table_stack) == 0)
             PRINT_INTERNAL()
         if (!find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string)) {
-            PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string);
+            PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string,data->is_in_declaration);
         }
         GET_TOKEN()
         data->is_it_let_condition = true;
@@ -651,7 +651,7 @@ int func_params(parser_data_t *data) {
             if(table_count_elements_in_stack(data->table_stack) != 2)
                 PRINT_INTERNAL()
             if (find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string))
-                PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string);
+                PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string,data->is_in_declaration);
 
             // if we are in definition, we need to add_LitInt_LitInt parameters to the local symtable
             bool internal_error;
@@ -660,7 +660,7 @@ int func_params(parser_data_t *data) {
             if (!(data->exp_type = insert_symbol(data->table_stack->top->table, data->token_ptr->attribute.string,
                                              &internal_error))) {
                 if (internal_error) PRINT_INTERNAL()
-                else PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string)
+                else PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string,data->is_in_declaration)
             }
             data->exp_type->defined = true;
         }

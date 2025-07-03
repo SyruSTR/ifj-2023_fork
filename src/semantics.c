@@ -397,7 +397,8 @@ int expression(parser_data_t* data){
                 data->param_index = 0;
 
                 if ((ret_code = call_params(data)))
-                    PRINT_UNRESOLVED(ret_code);
+                    // dont touch!!!
+                    return ret_code;
 
                 if (data->token_ptr->token_type != T_BRACKET_CLOSE) PRINT_SYNTAX_ERROR("Waiting ')'")
 
@@ -424,7 +425,7 @@ int expression(parser_data_t* data){
             case '=':
                 tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
-                    PRINT_UNDEF_OR_NOT_INIT_VAR(tmp_item.id);
+                    PRINT_UNDEF_OR_NOT_INIT_VAR(tmp_item.id,data->is_in_declaration);
 
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
@@ -471,7 +472,7 @@ int expression(parser_data_t* data){
                 }
                 tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
-                    PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->string->string);
+                    PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->string->string,data->is_in_declaration);
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -688,13 +689,13 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
     if (rule == OPERAND){
         if (operand_1->item.type == IT_UNDEF && !operand_1->item.is_function){
-            PRINT_UNDEF_OR_NOT_INIT_VAR(operand_1->item.id);
+            PRINT_UNDEF_OR_NOT_INIT_VAR(operand_1->item.id,data->is_in_declaration);
         }
     }
 
     if (rule == LBR_NT_RBR){
         if (operand_2->item.type == IT_UNDEF){
-            PRINT_UNDEF_OR_NOT_INIT_VAR(operand_2->item.id);
+            PRINT_UNDEF_OR_NOT_INIT_VAR(operand_2->item.id,data->is_in_declaration);
         }
     }
 
@@ -803,7 +804,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_F_UNWRAP:
 
             if (operand_1->item.type == IT_UNDEF) {
-                PRINT_UNDEF_OR_NOT_INIT_VAR(operand_1->item.id);
+                PRINT_UNDEF_OR_NOT_INIT_VAR(operand_1->item.id,data->is_in_declaration);
             }
             if(operand_1->item.type == IT_NIL)
                 PRINT_TYPE_COMP(IT_NIL, IT_NOT_NIL);
@@ -930,14 +931,14 @@ int check_param(parser_data_t* data, int position){
                 return ER_NONE;
             }
             else
-                PRINT_UNDEF_OR_NOT_INIT_VAR(sym->data.id);
+                PRINT_UNDEF_OR_NOT_INIT_VAR(sym->data.id,data->is_in_declaration);
         }
         else{
             string_ptr var_name = data->token_ptr->string;
             GET_TOKEN()
             if(data->token_ptr->token_type == T_COLON)
                 PRINT_UNRESOLVED(ER_OTHER_SEM)
-            PRINT_UNDEF_OR_NOT_INIT_VAR(var_name->string);
+            PRINT_UNDEF_OR_NOT_INIT_VAR(var_name->string,data->is_in_declaration);
         }
 
     } else{
