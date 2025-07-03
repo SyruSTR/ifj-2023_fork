@@ -15,7 +15,12 @@ void print_error(const char* format, ...) {
 
 void print_lexical_error(const int line, const int char_pos, const char* message) {
     const error_t code = ER_LEX;
-    print_error("{\n\t\"error_code\": %d,\n\t\"message\": \"Lexical error: %s\",\n\t\"line\": %d,\n\t\"char_pos\": %d}\n",
+    print_error("{"
+                "\n\t\"error_code\": %d,"
+                "\n\t\"message\": \"Lexical error: %s\","
+                "\n\t\"line\": %d,"
+                "\n\t\"char_pos\": %d"
+                "}\n",
                 code, message,line, char_pos);
 }
 
@@ -23,7 +28,15 @@ void print_syntax_error(const parser_data_t* data,const enum token_type verified
     const error_t code = ER_SYNTAX;
     char token_content_buff[100] = {0};
     strcat(token_content_buff,(data->token_ptr->string == NULL || data->token_ptr->string->string == NULL ? "null" : data->token_ptr->string->string));
-    print_error("{\n\t\"error_code\": %d,\n\t\"message\": \"Syntax error: didn't verify token: \",\n\t\"line\": %d,\n\t\"char_pos\": %d,\n\t\"token_type\":%d,\n\t\"token_string\":\"%s\",\n\t\"verified_token_type\":%d\n}\n",
+    print_error("{"
+                "\n\t\"error_code\": %d,"
+                "\n\t\"message\": \"Syntax error: didn't verify token: \","
+                "\n\t\"line\": %d,"
+                "\n\t\"char_pos\": %d,"
+                "\n\t\"token_type\":%d,"
+                "\n\t\"token_string\":\"%s\","
+                "\n\t\"verified_token_type\":%d"
+                "\n}\n",
             code,
             data->line_cnt,
             data->token_start_pos,
@@ -97,7 +110,8 @@ void print_params_error_type_mismatch(const parser_data_t* data, const item_type
     //     data->token_start_pos,
     //     data->token_ptr->string,
     //     );
-    print_error("{\n\t\"error_code\": %d,"
+    print_error("{"
+                "\n\t\"error_code\": %d,"
             "\n\t\"line\": %d,"
             "\n\t\"char_pos\": %d,"
             "\n\t\"function_name\": \"%s\","
@@ -133,7 +147,8 @@ void print_params_error_args_mismatch(const parser_data_t* data,int actual_args,
 
 void print_undef_or_not_init_variable_error(const parser_data_t* data, char* var_name, const bool is_it_assigment) {
     const int code = ER_UNDEF_VAR_OR_NOTINIT_VAR;
-    print_error("{\n\t\"error_code\": %d,"
+    print_error("{"
+                "\n\t\"error_code\": %d,"
         "\n\t\"line\": %d,"
         "\n\t\"char_pos\": %d,"
         "\n\t\"variable_name\": \"%s\","
@@ -149,7 +164,8 @@ void print_undef_or_not_init_variable_error(const parser_data_t* data, char* var
 
 void print_func_return_error(const char* function_name) {
     const int code = ER_FUNC_RETURN;
-    print_error("{\n\t\"error_code\": %d,"
+    print_error("{"
+                "\n\t\"error_code\": %d,"
         "\n\t\"function_name\": \"%s\""
         "\n}\n",
     code,
@@ -159,7 +175,8 @@ void print_func_return_error(const char* function_name) {
 
 void print_type_comp_error(const parser_data_t* data,const item_type actual_type,const item_type expected_type) {
     const error_t code = ER_TYPE_COMP;
-    print_error("{\n\t\"error_code\": %d,"
+    print_error("{"
+                "\n\t\"error_code\": %d,"
         "\n\t\"line\": %d,"
         "\n\t\"char_pos\": %d,"
         "\n\t\"expected_type\":%d,"
@@ -175,7 +192,8 @@ void print_type_comp_error(const parser_data_t* data,const item_type actual_type
 
 void print_type_comp_nil_error(const parser_data_t* data) {
     const error_t code = ER_TYPE_COMP;
-    print_error("{\n\t\"error_code\": %d,"
+    print_error("{"
+                "\n\t\"error_code\": %d,"
         "\n\t\"line\": %d,"
         "\n\t\"char_pos\": %d,"
         "\n\t\"expected_type\":%d,"
@@ -191,7 +209,8 @@ void print_type_comp_nil_error(const parser_data_t* data) {
 
 void print_inference_error(const parser_data_t* data) {
     const error_t code = ER_INFERENCE;
-    print_error("{\n\t\"error_code\": %d,"
+    print_error("{"
+                "\n\t\"error_code\": %d,"
         "\n\t\"line\": %d,"
         "\n\t\"char_pos\": %d,"
         "\n\t\"message\": \"%s\""
@@ -204,7 +223,8 @@ void print_inference_error(const parser_data_t* data) {
 }
 
 void print_unresolved_error(const parser_data_t* data, const int code) {
-    print_error("{\n\t\"error_code\": %d,"
+    print_error("{"
+                "\n\t\"error_code\": %d,"
         "\n\t\"line\": %d,"
         "\n\t\"char_pos\": %d,"
         "\n\t\"message\": \"%s\""
@@ -219,7 +239,8 @@ void print_unresolved_error(const parser_data_t* data, const int code) {
 void print_internal_error(const parser_data_t* data) {
     int code = ER_INTERNAL;
     if (data == NULL) {
-        print_error("{\n\t\"error_code\": %d,"
+        print_error("{"
+                    "\n\t\"error_code\": %d,"
             "\n\t\"message\": \"%s\""
             "\n}\n",
         code,
@@ -227,7 +248,8 @@ void print_internal_error(const parser_data_t* data) {
         );
     }
     else {
-        print_error("{\n\t\"error_code\": %d,"
+        print_error("{"
+                    "\n\t\"error_code\": %d,"
             "\n\t\"line\": %d,"
             "\n\t\"char_pos\": %d,"
             "\n\t\"message\": \"%s\""
