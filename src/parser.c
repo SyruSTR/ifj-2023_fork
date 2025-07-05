@@ -44,6 +44,14 @@ char tmp_str[100];
         else PRINT_UNDEF_FUNC_OR_NOT_INIT_VARIABLE()\
 }                       \
 
+#ifdef RUNTIME_ALARM
+void timeout_error(int sig) {
+    UNUSED(sig);
+    print_internal_error(0, "Timeout error");
+    exit(ER_INTERNAL);
+}
+#endif
+
 
 parser_data_t *init_data()
 {
@@ -249,6 +257,12 @@ int analyse() {
     data->line_cnt = 1;
 
     generator_start();
+
+#ifdef RUNTIME_ALARM
+    signal(SIGALRM, timeout_error);
+    alarm(10);
+#endif
+
 
     if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &flag,&data->current_char_pos, &data->token_start_pos)) != NULL)
     {

@@ -236,7 +236,7 @@ void print_unresolved_error(const parser_data_t* data, const int code) {
     );
 }
 
-void print_internal_error(const parser_data_t* data) {
+void print_internal_error(const parser_data_t* data, char* message) {
     int code = ER_INTERNAL;
     if (data == NULL) {
         print_error("{"
@@ -244,7 +244,7 @@ void print_internal_error(const parser_data_t* data) {
             "\n\t\"message\": \"%s\""
             "\n}\n",
         code,
-        "Internal error"
+        message
         );
     }
     else {
@@ -257,7 +257,7 @@ void print_internal_error(const parser_data_t* data) {
         code,
         data->line_cnt,
         data->token_start_pos,
-        "Internal error"
+        message
         );
     }
 }

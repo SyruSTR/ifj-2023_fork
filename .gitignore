@@ -13,6 +13,7 @@ compiler
 generator-debug
 generator_out
 generated_code
+compiler-debug
 
 .vscode
 CMakeLists.txt

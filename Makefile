@@ -41,6 +41,9 @@ test: compiler
 	./ifj23-tests/ic23int generator_out
 
 compiler: $(PARSER_PROGS) $(PROGS) $(GENERATOR_PROGS) src/main.c
+	$(CC) $(CFLAGS) $^ -o $@ -lm -DRUNTIME_ALARM
+
+compiler-debug: $(PARSER_PROGS) $(PROGS) $(GENERATOR_PROGS) src/main.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 clean:

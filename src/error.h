@@ -27,9 +27,9 @@
 
 #define PRINT_UNDEF_FUNC_OR_NOT_INIT_VARIABLE() {print_undef_func_or_redef_var_error(data); return ER_UNDEF_FUNC_OR_REDEF_VAR;}
 
-#define PRINT_INTERNAL() {print_internal_error(data); return ER_INTERNAL;}
+#define PRINT_INTERNAL(msg) {print_internal_error(data, msg); return ER_INTERNAL;}
 
-#define PRINT_INTERNAL_NULL_DATA(some) {print_internal_error(some); return ER_INTERNAL;}
+#define PRINT_INTERNAL_NULL_DATA(msg) {print_internal_error(0, msg); return ER_INTERNAL;}
 
 /**
  * @brief enum for readable code errors
@@ -76,6 +76,6 @@ void print_inference_error(const parser_data_t* data);
 
 void print_unresolved_error(const parser_data_t* data, int code);
 
-void print_internal_error(const parser_data_t* data);
+void print_internal_error(const parser_data_t* data, char* message);
 
 #endif
