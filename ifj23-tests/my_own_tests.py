@@ -8,6 +8,13 @@ def test_all():
     # infinity recursion :_(
     test("nil ?? 4","")
 
+    # infinity recursion :_(
+    test("""
+    Double
+
+    var a :Int 
+    ""","",expected_return_code=ErrorType.error_parser)
+
 if __name__ == "__main__":
     test_all()
     exit(nr_failed)
