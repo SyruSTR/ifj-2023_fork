@@ -417,7 +417,7 @@ int expression(parser_data_t* data){
 #ifdef FOR_LSP
             fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
-            ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL())
+            ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL("Stack error in semantic analyzer"))
             // FREE(ER_INTERNAL);
         }
 
@@ -435,7 +435,7 @@ int expression(parser_data_t* data){
 #ifdef FOR_LSP
                     fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
-                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL())
+                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL("Stack error in semantic analyzer"))
                     // FREE(ER_INTERNAL);
                 }
 
@@ -452,7 +452,7 @@ int expression(parser_data_t* data){
 #ifdef FOR_LSP
                     fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
-                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL())
+                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL("Internal error in semantic analyzer"))
                     // FREE(ER_INTERNAL);
                 }
 
@@ -467,7 +467,7 @@ int expression(parser_data_t* data){
 #ifdef FOR_LSP
                     fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
-                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL())
+                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL("Stack error in semantic analyzer"))
                     // FREE(ER_INTERNAL);
                 }
                 tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
@@ -481,7 +481,7 @@ int expression(parser_data_t* data){
 #ifdef FOR_LSP
                     fprintf(stderr, "Semantic analysis finish with error\n");
 #endif
-                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL())
+                    ERROR_WITH_FREE(ER_INTERNAL, PRINT_INTERNAL("Stack error in Semantic analyzer"))
                     // FREE(ER_INTERNAL);
                 }
 
@@ -916,7 +916,7 @@ int check_param(parser_data_t* data, int position){
     if(data->token_ptr->token_type == T_ID){
         symbol* sym = NULL;
         if(table_count_elements_in_stack(data->table_stack) == 0)
-            PRINT_INTERNAL();
+            PRINT_INTERNAL("Stack don't have any data");
 
         if((sym = find_symbol_global(data->table_stack,data->token_ptr->attribute.string, !strcmp(data->id->id,data->token_ptr->attribute.string))) != NULL){
             bool param_nil_possibility = false;

@@ -9,7 +9,9 @@
 #include "error.h"
 #include "hash.h"
 #include "parser.h"
-#include "table_stack.h"
+#include <signal.h>
+#include <unistd.h>
+#include <stdio.h>
 #include "semantics.h"
 #include "generator.h"
 
@@ -37,10 +39,10 @@ char tmp_str[100];
 #define INSERT_SYM() \
         bool internal_error; \
         if(table_count_elements_in_stack(data->table_stack) == 0)\
-            PRINT_INTERNAL();\
+            PRINT_INTERNAL("Stack error");\
         data->id = insert_symbol(data->table_stack->top->table,data->token_ptr->attribute.string,&internal_error);\
         if(!data->id){\
-            if(internal_error) PRINT_INTERNAL()\
+            if(internal_error) PRINT_INTERNAL("Identifier in data is not NULL")\
         else PRINT_UNDEF_FUNC_OR_NOT_INIT_VARIABLE()\
 }                       \
 
@@ -245,13 +247,13 @@ int analyse() {
 
     string_ptr string;
     if ((string = string_init()) == NULL)
-        PRINT_INTERNAL_NULL_DATA(((void *)0));
+        PRINT_INTERNAL_NULL_DATA("Internal error in String initialize");
 
     parser_data_t *data;
     if ((data = init_data()) == NULL)
     {
         string_free(string);
-        PRINT_INTERNAL()
+        PRINT_INTERNAL("Internal error in parser_data_init")
     }
 
     data->line_cnt = 1;
@@ -355,7 +357,7 @@ int stm(parser_data_t *data) {
     // <stm> -> id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_ID) {
         if(table_count_elements_in_stack(data->table_stack) == 0)
-            PRINT_INTERNAL()
+            PRINT_INTERNAL("Stack error in Parser")
         symbol *idFromTable = NULL;
 
         char *var_name = data->token_ptr->attribute.string;
@@ -614,7 +616,7 @@ int condition(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
         VERIFY_TOKEN(T_ID)
         if(table_count_elements_in_stack(data->table_stack) == 0)
-            PRINT_INTERNAL()
+            PRINT_INTERNAL("Stack error")
         if (!find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string)) {
             PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string,data->is_in_declaration);
         }
@@ -642,13 +644,13 @@ int func_params(parser_data_t *data) {
 
 
     if ((data->id->id_names = (char**)realloc(data->id->id_names,(data->param_index+1) * sizeof(char*)))==NULL)
-        PRINT_INTERNAL()
+        PRINT_INTERNAL("Allocation memory error")
     GET_TOKEN()
 
 
     if(data->token_ptr->token_type == T_UNDERLINE || data->token_ptr->token_type == T_ID){
         if((data->id->id_names[data->param_index] = (char*)realloc(data->id->id_names[data->param_index],strlen(data->token_ptr->attribute.string))) == NULL)
-            PRINT_INTERNAL()
+            PRINT_INTERNAL("Allocation memory error")
         if(data->token_ptr->token_type == T_UNDERLINE)
             strcpy(data->id->id_names[data->param_index],"_");
         else
@@ -663,17 +665,17 @@ int func_params(parser_data_t *data) {
             }
             // if there is function named as parameter
             if(table_count_elements_in_stack(data->table_stack) != 2)
-                PRINT_INTERNAL()
+                PRINT_INTERNAL("Stack error")
             if (find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string))
                 PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string,data->is_in_declaration);
 
             // if we are in definition, we need to add_LitInt_LitInt parameters to the local symtable
             bool internal_error;
             if(table_count_elements_in_stack(data->table_stack) == 0)
-                PRINT_INTERNAL()
+                PRINT_INTERNAL("Stack error")
             if (!(data->exp_type = insert_symbol(data->table_stack->top->table, data->token_ptr->attribute.string,
                                              &internal_error))) {
-                if (internal_error) PRINT_INTERNAL()
+                if (internal_error) PRINT_INTERNAL("Internal error")
                 else PRINT_UNDEF_OR_NOT_INIT_VAR(data->token_ptr->attribute.string,data->is_in_declaration)
             }
             data->exp_type->defined = true;
@@ -682,7 +684,7 @@ int func_params(parser_data_t *data) {
             item_data tmp_item = create_default_item();
 
             if((data->exp_type = (item_data *) malloc(sizeof(item_data))) == NULL) {
-                PRINT_INTERNAL()
+                PRINT_INTERNAL("Allocate memory error")
             }
 
             *(data->exp_type) = tmp_item;
@@ -875,10 +877,10 @@ int insert_data_type(parser_data_t *data){
                 data_type_for_func_params = 'd' - ((data->token_ptr->token_type == T_KEYWORD_NIL_POSSIBILITY) * 32);
                 break;
             default:
-                PRINT_INTERNAL()
+                PRINT_INTERNAL("Internal error")
         }
         if (!string_append(data->id->params, data_type_for_func_params)) {
-            PRINT_INTERNAL()
+            PRINT_INTERNAL("Internal error in String append")
         }
         data->exp_type->type = type;
     }
