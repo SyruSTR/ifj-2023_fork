@@ -17,7 +17,7 @@ void print_lexical_error(const int line, const int char_pos, const char* message
     const error_t code = ER_LEX;
     print_error("{"
                 "\n\t\"error_code\": %d,"
-                "\n\t\"message\": \"Lexical error: %s\","
+                "\n\t\"message\": \"%s\","
                 "\n\t\"line\": %d,"
                 "\n\t\"char_pos\": %d"
                 "}\n",

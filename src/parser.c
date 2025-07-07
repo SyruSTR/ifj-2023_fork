@@ -270,9 +270,6 @@ int analyse() {
     {
         ret_code = program(data);
     }
-    else {
-        print_lexical_error(data->line_cnt,data->token_start_pos,"Lex Error");
-    }
 
     generator_end();
     //

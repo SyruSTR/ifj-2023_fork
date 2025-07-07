@@ -81,8 +81,19 @@ void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type,strin
 void scanning_finish_with_error(token_t_ptr token, int* err, int error_type, int char_pos){
     char buffer[128] = {0};
     strcat(buffer, "Lexical error when check this: ");
-    if (token->string != NULL && token->string->string != NULL)
-        strcat(buffer, token->string->string);
+    if (token->string != NULL && token->string->string != NULL) {
+        const char first_char = token->string->string[0];
+        if (first_char == 123 || // its {
+            first_char == 125) // its }
+        {
+            char temp[7]; // format \uXXXX
+            snprintf(temp, sizeof(temp),"\\u00%x",first_char);
+            strcat(buffer, temp);
+        }
+        else
+            strcat(buffer, token->string->string);
+    }
+
     switch (error_type) {
         case ER_LEX:
             print_lexical_error(token->line,char_pos, buffer);
