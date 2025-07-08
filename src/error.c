@@ -70,26 +70,29 @@ void print_syntax_error_message(const parser_data_t* data,const char* message) {
 }
 
 void print_undef_func_or_redef_var_error(const parser_data_t* data) {
-    bool tmp_bool = data->id_type == NULL ? false : data->id_type->is_function;
+    bool tmp_bool = data->id == NULL ? false : data->id->is_function;
     const error_t code = ER_UNDEF_FUNC_OR_REDEF_VAR;
     char token_content_buff[100] = {0};
+    char * what_id_to_send = data->id == NULL ?
+        (data->token_ptr->string == NULL || data->token_ptr->string->string == NULL ? "null" : data->token_ptr->string->string) :
+        data->id->id;
     strcat(
         token_content_buff,
-        data->token_ptr->string == NULL || data->token_ptr->string->string == NULL ? "null" : data->token_ptr->string->string);
+        what_id_to_send);
     print_error("{"
                 "\n\t\"error_code\": %d,"
                 "\n\t\"line\": %d,"
                 "\n\t\"char_pos\": %d,"
                 "\n\t\"token_type\":%d,"
                 "\n\t\"token_string\":\"%s\","
-                "\n\t\"is_function\":%b"
+                "\n\t\"is_function\":%s"
                 "\n}\n",
             code,
             data->line_cnt,
             data->token_start_pos,
             data->token_ptr->token_type,
             token_content_buff,
-            tmp_bool);
+            BOOL_WRAP(tmp_bool));
 }
 
 void print_params_error_type_mismatch(const parser_data_t* data, const item_type actual_type, const item_type expected_type) {
