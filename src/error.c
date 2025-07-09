@@ -118,8 +118,8 @@ void print_params_error_type_mismatch(const parser_data_t* data, const item_type
             "\n\t\"line\": %d,"
             "\n\t\"char_pos\": %d,"
             "\n\t\"function_name\": \"%s\","
-            "\n\t\"actual_param_type\": \"%d\","
-            "\n\t\"expected_param_type\": \"%d\""
+            "\n\t\"actual_type\": %d,"
+            "\n\t\"expected_type\": %d"
             "\n}\n",
     code,
     data->line_cnt,
