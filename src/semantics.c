@@ -409,7 +409,7 @@ int expression(parser_data_t* data){
         }
         actual_symbol = convert_token_into_symbol(data,last_action_is_reduce);
         if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let && !data->eol_flag)
-            PRINT_UNRESOLVED(ret_code);
+            PRINT_UNRESOLVED(ER_SYNTAX);
         if(top_terminal == NULL){
 #ifdef SEM_DEBUG
             printf("semantic analysis finish with error\n");
