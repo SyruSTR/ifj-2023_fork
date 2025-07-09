@@ -593,8 +593,7 @@ int call_params_n(parser_data_t *data) {
     }
     else if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
         if(data->param_index+1 != data->id_type->params->last_index && !its_write) {
-            print_params_error_args_mismatch(data, data->param_index+1, data->id_type->params->last_index);
-            PRINT_UNRESOLVED(ER_PARAMS)
+            PRINT_ERROR_PARAMS_TYPE_MISMATCH(data->param_index+1,data->id_type->params->last_index);
         }
         return ER_NONE;
     }

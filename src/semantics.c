@@ -13,10 +13,6 @@
 
 #define TABLE_SIZE 16
 
-#define PRINT_ERROR_PARAMS_TYPE_MISMATCH(actual,expected) {print_params_error_type_mismatch(data,actual,expected); return ER_PARAMS;}
-
-#define PRINT_ERROR_PARAMS_ARGS_MISMATCH(actual,expected) {print_params_error_args_mismatch(data,actual,expected); return ER_PARAMS;}
-
 
 t_stack stack;
 
