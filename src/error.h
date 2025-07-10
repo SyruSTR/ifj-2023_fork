@@ -31,7 +31,7 @@
 
 #define PRINT_INTERNAL_NULL_DATA(msg) {print_internal_error(0, msg); return ER_INTERNAL;}
 
-#define PRINT_ERROR_PARAMS_TYPE_MISMATCH(actual,expected) {print_params_error_type_mismatch(data,actual,expected); return ER_PARAMS;}
+#define PRINT_ERROR_PARAMS_TYPE_MISMATCH(actual_type,expected_type,actual_nil,expected_nil) {print_params_error_type_mismatch(data,actual_type,expected_type,actual_nil,expected_nil); return ER_PARAMS;}
 
 #define PRINT_ERROR_PARAMS_ARGS_MISMATCH(actual,expected) {print_params_error_args_mismatch(data,actual,expected); return ER_PARAMS;}
 
@@ -64,7 +64,7 @@ void print_syntax_error_message(const parser_data_t* data,const char* message);
 
 void print_undef_func_or_redef_var_error(const parser_data_t* data);
 
-void print_params_error_type_mismatch(const parser_data_t* data,item_type actual_type, item_type expected_type);
+void print_params_error_type_mismatch(const parser_data_t* data,item_type actual_type, item_type expected_type, bool actual_nil, bool expected_nil);
 
 void print_params_error_args_mismatch(const parser_data_t* data,int actual_args, int expected_args);
 

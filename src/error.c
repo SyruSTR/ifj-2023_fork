@@ -95,7 +95,7 @@ void print_undef_func_or_redef_var_error(const parser_data_t* data) {
             BOOL_WRAP(tmp_bool));
 }
 
-void print_params_error_type_mismatch(const parser_data_t* data, const item_type actual_type, const item_type expected_type) {
+void print_params_error_type_mismatch(const parser_data_t* data,item_type actual_type, item_type expected_type, bool actual_nil, bool expected_nil) {
     const error_t code = ER_PARAMS_TYPE_MISMATCH;
     // print_error("{\n\t\"error_code\": %d,"
     //             "\n\t\"line\": %d,"
@@ -119,14 +119,18 @@ void print_params_error_type_mismatch(const parser_data_t* data, const item_type
             "\n\t\"char_pos\": %d,"
             "\n\t\"function_name\": \"%s\","
             "\n\t\"actual_type\": %d,"
-            "\n\t\"expected_type\": %d"
+            "\n\t\"actual_is_nil_possibility\": %s,"
+            "\n\t\"expected_type\": %d,"
+            "\n\t\"expected_is_nil_possibility\": %s"
             "\n}\n",
     code,
     data->line_cnt,
     data->token_start_pos,
     data->id_type->id,
     actual_type,
-    expected_type
+    BOOL_WRAP(actual_nil),
+    expected_type,
+    BOOL_WRAP(expected_nil)
     );
 }
 

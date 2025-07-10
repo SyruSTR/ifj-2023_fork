@@ -920,7 +920,7 @@ int check_param(parser_data_t* data, int position){
             if((sym->data.type != param_type
                 || (data->is_it_let_condition ? false : sym->data.nil_possibility) != param_nil_possibility)
                 && data->id_type->type != IT_ANY){
-                PRINT_ERROR_PARAMS_TYPE_MISMATCH(sym->data.type,param_type);
+                PRINT_ERROR_PARAMS_TYPE_MISMATCH(sym->data.type,param_type,sym->data.nil_possibility,param_nil_possibility);
             }
             if(sym->data.defined) {
                 gen_function_pass_param_push(data->token_ptr, !sym->data.global);
@@ -947,7 +947,7 @@ int check_param(parser_data_t* data, int position){
             && param_type != IT_ANY) {
             if(type == IT_NIL && param_nil_possibility)
                 return ER_NONE;
-            PRINT_ERROR_PARAMS_TYPE_MISMATCH(type,param_type);
+            PRINT_ERROR_PARAMS_TYPE_MISMATCH(type,param_type, type == IT_NIL, param_nil_possibility);
         }
         return ER_NONE;
     }
