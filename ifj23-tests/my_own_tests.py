@@ -32,6 +32,11 @@ def test_all():
     a(value)
     """, ErrorType.error_type)
 
+    test_invalid("""
+    func a(_ i: Int?,) {}
+    a(nil)
+    """, ErrorType.error_parser)
+
 if __name__ == "__main__":
     test_all()
     exit(nr_failed)
