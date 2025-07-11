@@ -37,6 +37,14 @@ def test_all():
     a(nil)
     """, ErrorType.error_parser)
 
+    # is it parser error?
+    test_invalid("""
+    func a() -> String {
+        return 
+        return 
+    }
+    """,ErrorType.error_parser)
+
 if __name__ == "__main__":
     test_all()
     exit(nr_failed)
