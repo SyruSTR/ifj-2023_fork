@@ -338,7 +338,7 @@ int reduce(parser_data_t* data){
 #ifdef FOR_LSP
             fprintf(stderr, "Wrong Types\n");
 #endif
-            PRINT_UNRESOLVED(ret_code)
+            return ret_code;
         }
         if(rule == NT_PLUS_NT && final_item.type == IT_STRING)
             gen_concat_stack_strings();
