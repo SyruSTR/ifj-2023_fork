@@ -548,7 +548,7 @@ int stm(parser_data_t *data) {
         }
         else {
             CHECK_RULE(return_rule)
-            // bug?
+            // for unreachable code
             if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return stm(data);
         }
         data->func_id = NULL;
@@ -749,12 +749,13 @@ int return_rule(parser_data_t *data) {
 
     if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return))
         PRINT_SYNTAX_ERROR("Waiting non a Keyword or return")
+    int line_with_return = data->token_ptr->line;
     GET_TOKEN()
     if(data->func_id == NULL)
         PRINT_SYNTAX_ERROR("Waiting return is placed other of body")
     data->id = data->func_id;
 
-    if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) PRINT_FUNC_RETURN(data->id->id);
+    if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) PRINT_FUNC_RETURN(data->id->id, false);
     CHECK_RULE(expression)
 
     return ret_code;

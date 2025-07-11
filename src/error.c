@@ -169,14 +169,20 @@ void print_undef_or_not_init_variable_error(const parser_data_t* data, char* var
     );
 }
 
-void print_func_return_error(const char* function_name) {
+void print_func_return_error(const char* function_name, int line, bool is_void_function) {
     const int code = ER_FUNC_RETURN;
     print_error("{"
                 "\n\t\"error_code\": %d,"
-        "\n\t\"function_name\": \"%s\""
+        "\n\t\"line\": %d,"
+        "\n\t\"char_pos\": %d,"
+        "\n\t\"function_name\": \"%s\","
+        "\n\t\"is_void_function\": %s"
         "\n}\n",
     code,
-    function_name
+    line,
+    0,
+    function_name,
+    BOOL_WRAP(is_void_function)
     );
 }
 
